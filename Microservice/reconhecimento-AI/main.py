@@ -16,7 +16,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-RABBITMQ_HOST = 'localhost'
+RABBITMQ_HOST = os.getenv('RABBITMQ_HOST','localhost')
 RABBITMQ_QUEUE = 'fila_de_verificacao'
 
 os.makedirs("uploads", exist_ok=True)

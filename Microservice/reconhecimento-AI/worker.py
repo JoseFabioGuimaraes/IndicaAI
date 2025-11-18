@@ -19,7 +19,7 @@ MODELO_FACIAL = "Facenet"
 DETECTOR_FACIAL = "mtcnn"
 LIMIAR_FACIAL = 0.50
 
-RABBITMQ_HOST = 'localhost'
+RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
 RABBITMQ_QUEUE = 'fila_de_verificacao'
 
 def processar_trabalho(job_data: dict):

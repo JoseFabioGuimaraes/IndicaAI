@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # 1. Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_broker
+    ports:
+      - "5672:5672"   # Porta de comunicação
+      - "15672:15672" # Painel de gerenciamento (login: guest/guest)
+    networks:
+      - ai_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  locker-ai:
+    build: ./lockeAI
+    container_name: lockeAI_service
+    ports:
+      - "8001:8000" # Acessível em localhost:8001
+    networks:
+      - ai_network
+    environment:
+      - LOG_LEVEL=info
+
+  reconhecimento-api:
+    build: ./reconhecimento-AI
+    container_name: reconhecimento_api
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8002:8000" # Acessível em localhost:8002
+    volumes:
+      - shared_uploads:/app/uploads # Mapeia a pasta de uploads
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - ai_network
+
+  reconhecimento-worker:
+    build: ./reconhecimento-AI
+    container_name: reconhecimento_worker
+    command: python worker.py 
+    volumes:
+      - shared_uploads:/app/uploads 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - CUDA_VISIBLE_DEVICES=-1 
+    networks:
+      - ai_network
+
+volumes:
+  shared_uploads: 
+networks:
+  ai_network:
+    driver: bridge
