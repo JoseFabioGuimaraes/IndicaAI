@@ -1,0 +1,21 @@
+[project]
+name = "lockeai"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "JoseFabioGuimaraes",email = "jfabioguimaraes@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi (>=0.121.1,<0.122.0)",
+    "uvicorn[standard] (>=0.38.0,<0.39.0)",
+    "tensorflow (==2.16.1)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "pillow (>=12.0.0,<13.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
