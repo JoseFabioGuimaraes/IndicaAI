@@ -71,7 +71,7 @@ def processar_trabalho(job_data: dict):
 def main():
     logging.info("Tentando conectar ao RabbitMQ...")
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST, heartbeat = 0))
         channel = connection.channel()
 
         channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)

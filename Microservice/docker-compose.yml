@@ -33,7 +33,8 @@ services:
     ports:
       - "8002:8000" # Acessível em localhost:8002
     volumes:
-      - shared_uploads:/app/uploads # Mapeia a pasta de uploads
+      - shared_uploads:/app/uploads
+      - deepface_weights:/root/.deepface
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -59,6 +60,7 @@ services:
 
 volumes:
   shared_uploads: 
+  deepface_weights:
 networks:
   ai_network:
     driver: bridge
