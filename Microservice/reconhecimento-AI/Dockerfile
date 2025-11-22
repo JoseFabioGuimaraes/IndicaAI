@@ -3,6 +3,7 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+# Instala dependências do sistema necessárias para OpenCV e InsightFace
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libgl1 \
@@ -11,9 +12,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY pyproject.toml poetry.lock* ./
 
-# ADICIONADO: --no-root
+# Instala as dependências do projeto
+# IMPORTANTE: Certifique-se de ter rodado "poetry add pika" antes
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --no-root
 
 COPY . .
+
+CMD ["python", "consumer.py"]

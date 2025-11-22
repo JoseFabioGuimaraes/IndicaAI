@@ -1,66 +1,36 @@
 version: '3.8'
 
 services:
-  # 1. Message Broker
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq_broker
+    container_name: meu-rabbitmq
+    hostname: rabbitmq
     ports:
-      - "5672:5672"   # Porta de comunicação
-      - "15672:15672" # Painel de gerenciamento (login: guest/guest)
-    networks:
-      - ai_network
+      - "5672:5672" 
+      - "15672:15672" 
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: ["CMD", "rabbitmqctl", "status"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  locker-ai:
-    build: ./lockeAI
-    container_name: lockeAI_service
-    ports:
-      - "8001:8000" # Acessível em localhost:8001
-    networks:
-      - ai_network
-    environment:
-      - LOG_LEVEL=info
-
-  reconhecimento-api:
-    build: ./reconhecimento-AI
-    container_name: reconhecimento_api
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
-    ports:
-      - "8002:8000" # Acessível em localhost:8002
-    volumes:
-      - shared_uploads:/app/uploads
-      - deepface_weights:/root/.deepface
+  locke-ai:
+    build: ./lockeAI  
+    container_name: worker-triagem
     depends_on:
       rabbitmq:
         condition: service_healthy
     environment:
       - RABBITMQ_HOST=rabbitmq
-    networks:
-      - ai_network
-
-  reconhecimento-worker:
-    build: ./reconhecimento-AI
-    container_name: reconhecimento_worker
-    command: python worker.py 
-    volumes:
-      - shared_uploads:/app/uploads 
+    restart: on-failure
+  reconhecimento-ai:
+    build: ./reconhecimento-AI 
+    container_name: worker-biometria
     depends_on:
       rabbitmq:
         condition: service_healthy
     environment:
       - RABBITMQ_HOST=rabbitmq
-      - CUDA_VISIBLE_DEVICES=-1 
-    networks:
-      - ai_network
-
-volumes:
-  shared_uploads: 
-  deepface_weights:
-networks:
-  ai_network:
-    driver: bridge
+    restart: on-failure
