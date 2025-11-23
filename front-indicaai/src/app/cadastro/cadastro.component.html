@@ -102,10 +102,23 @@
           </div>
         </div>
 
-        <button type="submit" [disabled]="!cadastroForm.valid" class="btn-submit">
+        <button type="submit" class="btn-submit">
           FINALIZAR CADASTRO
         </button>
       </form>
     </div>
+  </div>
+</div>
+
+<!-- Popup de Sucesso -->
+<div class="popup-overlay" *ngIf="mostrarPopupSucesso">
+  <div class="popup-content">
+    <div class="popup-icon">
+      ✅
+    </div>
+    <h3>Cadastro Realizado!</h3>
+    <p>Seus dados foram enviados com sucesso.</p>
+    <p class="info-text">Sua imagem está em análise. Você receberá um email assim que for aprovado.</p>
+    <button (click)="fecharPopup()" class="btn-popup">Entendi</button>
   </div>
 </div>

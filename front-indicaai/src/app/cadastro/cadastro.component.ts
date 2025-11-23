@@ -1,6 +1,7 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { FuncionarioService } from '../services/funcionario';
 
 @Component({
@@ -21,9 +22,14 @@ export class CadastroComponent {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   stream: MediaStream | null = null;
 
+  // Variável para controle do popup
+  mostrarPopupSucesso = false;
+
   constructor(
     private fb: FormBuilder,
-    private funcionarioService: FuncionarioService
+    private funcionarioService: FuncionarioService,
+    private router: Router, // Injetando Router
+    private cdr: ChangeDetectorRef // Injetando ChangeDetectorRef
   ) {
     this.cadastroForm = this.fb.group({
       nomeCompleto: ['', Validators.required],
@@ -44,7 +50,7 @@ export class CadastroComponent {
     valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
     valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 
-    this.cadastroForm.get('cpf')?.setValue(valor, { emitEvent: false });
+    this.cadastroForm.get('cpf')?.setValue(valor);
   }
 
   // --- LÓGICA DE UPLOAD (Arquivo) ---
@@ -120,28 +126,39 @@ export class CadastroComponent {
     if (this.cadastroForm.valid) {
       console.log('Iniciando envio para o servidor...');
 
-      this.funcionarioService.cadastrar(this.cadastroForm.value).subscribe({
+      // SIMULAÇÃO DE CADASTRO (Backend pode não estar rodando)
+      // Para usar o backend real, descomente o código abaixo e comente o setTimeout
 
+      this.funcionarioService.cadastrar(this.cadastroForm.value).subscribe({
         next: (resposta) => {
           console.log('Sucesso:', resposta);
-          alert(`Funcionário cadastrado com sucesso! ID: ${resposta.id}`);
-
-          this.cadastroForm.reset();
-          this.fotoRostoPreview = null;
-          this.fotoDocPreview = null;
+          this.mostrarPopupSucesso = true;
+          this.cdr.detectChanges(); // Força a atualização da tela
         },
-
         error: (erro) => {
           console.error('Erro na requisição:', erro);
-
           const mensagemErro = erro.error?.message || 'Erro ao conectar com o servidor.';
-
           alert(`Falha ao cadastrar: ${mensagemErro}`);
         }
       });
 
+      // Simulação de sucesso após 1 segundo
+      // setTimeout(() => {
+      //   console.log('Cadastro simulado com sucesso');
+      //   this.mostrarPopupSucesso = true;
+      // }, 1000);
+
     } else {
-      alert('Por favor, preencha todos os campos corretamente antes de enviar.');
+      alert('Por favor, preencha todos os campos corretamente antes de enviar. Verifique se as fotos foram tiradas.');
     }
+  }
+
+  fecharPopup() {
+    this.mostrarPopupSucesso = false;
+    this.cadastroForm.reset();
+    this.fotoRostoPreview = null;
+    this.fotoDocPreview = null;
+    // Redireciona para o login
+    this.router.navigate(['/login']);
   }
 }

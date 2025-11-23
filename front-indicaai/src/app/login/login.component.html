@@ -1,0 +1,40 @@
+<div class="split-container">
+    <!-- Lado Esquerdo: Marca/Logo -->
+    <div class="brand-section">
+        <div class="brand-content">
+            <img src="wmremove-transformed (1).png" alt="Indica.AI Logo" class="brand-logo">
+            <h1>Indica.AI</h1>
+        </div>
+    </div>
+
+    <!-- Lado Direito: Formulário -->
+    <div class="form-section">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h2>Acesse sua Conta</h2>
+                <p class="subtitle">Bem-vindo! Insira seus dados.</p>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" formControlName="email" placeholder="email@exemplo.com">
+                </div>
+
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" formControlName="senha" placeholder="********">
+                </div>
+
+                <button type="submit" [disabled]="!loginForm.valid" class="btn-submit">
+                    ENTRAR
+                </button>
+
+                <div class="footer-links">
+                    <p>Não tem uma conta? <a (click)="irParaCadastro()">Cadastre-se</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
