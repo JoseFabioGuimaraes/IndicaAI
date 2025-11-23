@@ -28,7 +28,10 @@ public class Funcionario {
     @Column(nullable = false)
     private String senha;
 
+    @Column(columnDefinition = "TEXT")
     private String fotoRostoUrl;
+
+    @Column(columnDefinition = "TEXT")
     private String fotoDocumentoUrl;
 
     @Enumerated(EnumType.STRING)

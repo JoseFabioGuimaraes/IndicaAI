@@ -8,7 +8,8 @@ import br.com.indicaAI.API.infrastructure.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.util.UUID;
 
 @Service
@@ -38,15 +39,22 @@ public class FuncionarioService {
         novo.setSenha(dados.senha());
         novo.setFotoRostoUrl(dados.fotoRostoUrl());
         novo.setFotoDocumentoUrl(dados.fotoDocumentoUrl());
+
         novo.setStatus(StatusFuncionario.PENDENTE_VALIDACAO);
 
         Funcionario salvo = funcionarioRepository.save(novo);
-        var mensagem = new SolicitacaoValidacaoMQ(
-                salvo.getId(),
-                salvo.getFotoRostoUrl(),
-                salvo.getFotoDocumentoUrl()
-        );
-        rabbitTemplate.convertAndSend(RabbitMQConfig.FILA_VALIDACAO_REQUEST, mensagem);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                var mensagem = new SolicitacaoValidacaoMQ(
+                        salvo.getId(),
+                        salvo.getFotoRostoUrl(),
+                        salvo.getFotoDocumentoUrl()
+                );
+                rabbitTemplate.convertAndSend(RabbitMQConfig.FILA_VALIDACAO_REQUEST, mensagem);
+                System.out.println("Mensagem enviada para o RabbitMQ após commit!");
+            }
+        });
 
         return new DetalhamentoFuncionarioDTO(salvo);
     }
@@ -60,15 +68,9 @@ public class FuncionarioService {
     public DetalhamentoFuncionarioDTO atualizar(UUID id, AtualizacaoFuncionarioDTO dados) {
         var funcionario = buscarFuncionarioAtivo(id);
 
-        if (dados.nomeCompleto() != null) {
-            funcionario.setNomeCompleto(dados.nomeCompleto());
-        }
-        if (dados.senha() != null) {
-            funcionario.setSenha(dados.senha());
-        }
-        if (dados.email() != null) {
-            funcionario.setEmail(dados.email());
-        }
+        if (dados.nomeCompleto() != null) funcionario.setNomeCompleto(dados.nomeCompleto());
+        if (dados.senha() != null) funcionario.setSenha(dados.senha());
+        if (dados.email() != null) funcionario.setEmail(dados.email());
 
         return new DetalhamentoFuncionarioDTO(funcionario);
     }
@@ -78,6 +80,7 @@ public class FuncionarioService {
         var funcionario = buscarFuncionarioAtivo(id);
         funcionario.setStatus(StatusFuncionario.INATIVO);
     }
+
     private Funcionario buscarFuncionarioAtivo(UUID id) {
         var funcionario = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Funcionário não encontrado com id: " + id));

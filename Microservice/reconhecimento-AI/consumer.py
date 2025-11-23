@@ -5,64 +5,63 @@ import logging
 import requests
 import numpy as np
 import cv2
+import base64
+import urllib.request
 from insightface.app import FaceAnalysis
 
-# --- Configuração de Log e Ambiente ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'rabbitmq')
-# A MUDANÇA ESTÁ AQUI: Escuta a fila intermediária
 QUEUE_INPUT = 'validacao.biometria.request' 
-# Responde para o Java
 QUEUE_OUTPUT = 'validacao.documento.response'
 
-# --- Inicialização do Modelo (InsightFace) ---
-# Carregamos fora do loop para não travar a cada requisição
 logging.info("Carregando modelo InsightFace...")
 app = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 logging.info("Modelo carregado!")
 
-def download_image(url):
-    """Baixa a imagem e converte para formato OpenCV (numpy)"""
+def carregar_imagem(source):
     try:
-        resp = requests.get(url, timeout=10)
-        if resp.status_code != 200:
-            return None
-        image_array = np.asarray(bytearray(resp.content), dtype="uint8")
-        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-        return image
+        if source.startswith("data:image") or source.startswith("JVBER") or len(source) > 2000:
+            if "," in source:
+                source = source.split(",")[1]
+            
+            image_data = base64.b64decode(source)
+            image_array = np.asarray(bytearray(image_data), dtype="uint8")
+            return cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+        if source.startswith("http"):
+            resp = requests.get(source, timeout=10)
+            if resp.status_code == 200:
+                image_array = np.asarray(bytearray(resp.content), dtype="uint8")
+                return cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     except Exception as e:
-        logging.error(f"Erro download imagem: {e}")
-        return None
+        logging.error(f"Erro ao processar imagem: {e}")
+    return None
 
 def processar_biometria(url_rosto, url_doc):
-    """Logica Core de Reconhecimento"""
-    img_rosto = download_image(url_rosto)
-    img_doc = download_image(url_doc)
+    img_rosto = carregar_imagem(url_rosto)
+    img_doc = carregar_imagem(url_doc)
 
     if img_rosto is None or img_doc is None:
-        return False, "Erro ao baixar uma das imagens."
+        return False, "Erro ao baixar ou decodificar uma das imagens."
 
     faces_rosto = app.get(img_rosto)
     faces_doc = app.get(img_doc)
 
-    # Validação básica de detecção
     if len(faces_rosto) == 0:
         return False, "Nenhum rosto detectado na selfie."
     if len(faces_doc) == 0:
         return False, "Nenhum rosto detectado no documento."
 
-    # Pega o primeiro rosto (mais proeminente)
     emb_rosto = faces_rosto[0].embedding
     emb_doc = faces_doc[0].embedding
 
-    # Cálculo da similaridade (Cosseno)
     sim = np.dot(emb_rosto, emb_doc) / (np.linalg.norm(emb_rosto) * np.linalg.norm(emb_doc))
     
     logging.info(f"Similaridade calculada: {sim}")
 
-    if sim >= 0.4: # Seu threshold definido
+    if sim >= 0.4:
         return True, "Validação biométrica realizada com sucesso."
     else:
         return False, "O rosto da selfie não confere com o documento."
@@ -78,7 +77,6 @@ def callback(ch, method, properties, body):
             dados.get('fotoDocumentoUrl')
         )
 
-        # Monta resposta final para o Java
         payload = {
             "funcionarioId": func_id,
             "aprovado": aprovado,
@@ -97,7 +95,6 @@ def callback(ch, method, properties, body):
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
-# --- Loop Principal ---
 if __name__ == "__main__":
     while True:
         try:
@@ -106,7 +103,6 @@ if __name__ == "__main__":
             )
             channel = connection.channel()
             
-            # Declara as filas necessárias
             channel.queue_declare(queue=QUEUE_INPUT, durable=True)
             channel.queue_declare(queue=QUEUE_OUTPUT, durable=True)
 
