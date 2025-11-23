@@ -5,5 +5,6 @@ public enum StatusFuncionario {
     PENDENTE_VALIDACAO,
     ATIVO,
     BLOQUEADO,
-    REJEITADO
+    REJEITADO,
+    INATIVO
 }
