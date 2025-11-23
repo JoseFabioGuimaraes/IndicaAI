@@ -15,19 +15,51 @@
         <p class="subtitle">Cadastre seus dados e biometria.</p>
       </div>
 
+      <div class="toggle-container">
+        <span [class.active]="tipoCadastro === 'funcionario'">Pessoa Física</span>
+        <label class="switch">
+          <input type="checkbox" (change)="alternarTipo($event)">
+          <span class="slider round"></span>
+        </label>
+        <span [class.active]="tipoCadastro === 'empresa'">Empresa</span>
+      </div>
+
       <form [formGroup]="cadastroForm" (ngSubmit)="onSubmit()">
 
-        <div class="input-group">
-          <label>Nome Completo</label>
-          <input type="text" formControlName="nomeCompleto" placeholder="Seu nome completo">
+        <!-- CAMPOS DE FUNCIONÁRIO -->
+        <div *ngIf="tipoCadastro === 'funcionario'">
+          <div class="input-group">
+            <label>Nome Completo</label>
+            <input type="text" formControlName="nomeCompleto" placeholder="Seu nome completo">
+          </div>
+
+          <div class="input-group">
+            <label>CPF</label>
+            <input type="text" formControlName="cpf" placeholder="000.000.000-00" (input)="formatarCPF($event)"
+              maxlength="14">
+          </div>
         </div>
 
-        <div class="input-group">
-          <label>CPF</label>
-          <input type="text" formControlName="cpf" placeholder="000.000.000-00" (input)="formatarCPF($event)"
-            maxlength="14">
+        <!-- CAMPOS DE EMPRESA -->
+        <div *ngIf="tipoCadastro === 'empresa'">
+          <div class="input-group">
+            <label>Razão Social</label>
+            <input type="text" formControlName="razaoSocial" placeholder="Razão Social da Empresa">
+          </div>
+
+          <div class="input-group">
+            <label>Nome Fantasia</label>
+            <input type="text" formControlName="nomeFantasia" placeholder="Nome Fantasia">
+          </div>
+
+          <div class="input-group">
+            <label>CNPJ</label>
+            <input type="text" formControlName="cnpj" placeholder="00.000.000/0000-00" (input)="formatarCNPJ($event)"
+              maxlength="18">
+          </div>
         </div>
 
+        <!-- CAMPOS COMUNS -->
         <div class="input-group">
           <label>Email</label>
           <input type="email" formControlName="email" placeholder="email@exemplo.com">
@@ -38,72 +70,75 @@
           <input type="password" formControlName="senha" placeholder="********">
         </div>
 
-        <hr class="divider">
+        <hr class="divider" *ngIf="tipoCadastro === 'funcionario'">
 
-        <!-- Foto do Rosto -->
-        <div class="media-group">
-          <label class="section-label">Foto do Rosto</label>
+        <!-- FOTOS (APENAS FUNCIONÁRIO) -->
+        <div *ngIf="tipoCadastro === 'funcionario'">
+          <!-- Foto do Rosto -->
+          <div class="media-group">
+            <label class="section-label">Foto do Rosto</label>
 
-          <div class="upload-card">
-            <div class="preview-area" *ngIf="fotoRostoPreview">
-              <img [src]="fotoRostoPreview">
-              <button type="button" class="btn-remove" (click)="fotoRostoPreview = null">×</button>
-            </div>
-
-            <div class="actions" *ngIf="cameraAtiva !== 'rosto' && !fotoRostoPreview">
-              <div class="action-btn upload" (click)="fileRosto.click()">
-                <span class="icon">📁</span>
-                <span>Carregar Foto</span>
+            <div class="upload-card">
+              <div class="preview-area" *ngIf="fotoRostoPreview">
+                <img [src]="fotoRostoPreview">
+                <button type="button" class="btn-remove" (click)="fotoRostoPreview = null">×</button>
               </div>
-              <div class="action-btn camera" (click)="iniciarCamera('rosto')">
-                <span class="icon">📷</span>
-                <span>Usar Câmera</span>
+
+              <div class="actions" *ngIf="cameraAtiva !== 'rosto' && !fotoRostoPreview">
+                <div class="action-btn upload" (click)="fileRosto.click()">
+                  <span class="icon">📁</span>
+                  <span>Carregar Foto</span>
+                </div>
+                <div class="action-btn camera" (click)="iniciarCamera('rosto')">
+                  <span class="icon">📷</span>
+                  <span>Usar Câmera</span>
+                </div>
               </div>
-            </div>
 
-            <div class="camera-container" *ngIf="cameraAtiva === 'rosto'">
-              <video #videoElement autoplay playsinline></video>
-              <button type="button" class="btn-capture" (click)="tirarFoto()"></button>
-              <button type="button" class="btn-close-camera" (click)="pararCamera()">Cancelar</button>
-            </div>
+              <div class="camera-container" *ngIf="cameraAtiva === 'rosto'">
+                <video #videoElement autoplay playsinline></video>
+                <button type="button" class="btn-capture" (click)="tirarFoto()"></button>
+                <button type="button" class="btn-close-camera" (click)="pararCamera()">Cancelar</button>
+              </div>
 
-            <input #fileRosto type="file" hidden (change)="onFileSelected($event, 'rosto')">
+              <input #fileRosto type="file" hidden (change)="onFileSelected($event, 'rosto')">
+            </div>
           </div>
-        </div>
 
-        <!-- Foto do Documento -->
-        <div class="media-group">
-          <label class="section-label">Foto do Documento</label>
+          <!-- Foto do Documento -->
+          <div class="media-group">
+            <label class="section-label">Foto do Documento</label>
 
-          <div class="upload-card">
-            <div class="preview-area" *ngIf="fotoDocPreview">
-              <img [src]="fotoDocPreview">
-              <button type="button" class="btn-remove" (click)="fotoDocPreview = null">×</button>
-            </div>
-
-            <div class="actions" *ngIf="cameraAtiva !== 'doc' && !fotoDocPreview">
-              <div class="action-btn upload" (click)="fileDoc.click()">
-                <span class="icon">📄</span>
-                <span>Carregar Foto</span>
+            <div class="upload-card">
+              <div class="preview-area" *ngIf="fotoDocPreview">
+                <img [src]="fotoDocPreview">
+                <button type="button" class="btn-remove" (click)="fotoDocPreview = null">×</button>
               </div>
-              <div class="action-btn camera" (click)="iniciarCamera('doc')">
-                <span class="icon">📷</span>
-                <span>Usar Câmera</span>
+
+              <div class="actions" *ngIf="cameraAtiva !== 'doc' && !fotoDocPreview">
+                <div class="action-btn upload" (click)="fileDoc.click()">
+                  <span class="icon">📄</span>
+                  <span>Carregar Foto</span>
+                </div>
+                <div class="action-btn camera" (click)="iniciarCamera('doc')">
+                  <span class="icon">📷</span>
+                  <span>Usar Câmera</span>
+                </div>
               </div>
-            </div>
 
-            <div class="camera-container" *ngIf="cameraAtiva === 'doc'">
-              <video #videoElement autoplay playsinline></video>
-              <button type="button" class="btn-capture" (click)="tirarFoto()"></button>
-              <button type="button" class="btn-close-camera" (click)="pararCamera()">Cancelar</button>
-            </div>
+              <div class="camera-container" *ngIf="cameraAtiva === 'doc'">
+                <video #videoElement autoplay playsinline></video>
+                <button type="button" class="btn-capture" (click)="tirarFoto()"></button>
+                <button type="button" class="btn-close-camera" (click)="pararCamera()">Cancelar</button>
+              </div>
 
-            <input #fileDoc type="file" hidden (change)="onFileSelected($event, 'doc')">
+              <input #fileDoc type="file" hidden (change)="onFileSelected($event, 'doc')">
+            </div>
           </div>
         </div>
 
         <button type="submit" class="btn-submit">
-          FINALIZAR CADASTRO
+          {{ tipoCadastro === 'funcionario' ? 'FINALIZAR CADASTRO' : 'CADASTRAR EMPRESA' }}
         </button>
       </form>
     </div>

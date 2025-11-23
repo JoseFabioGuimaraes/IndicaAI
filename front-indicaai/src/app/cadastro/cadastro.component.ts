@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FuncionarioService } from '../services/funcionario';
+import { EmpresaService } from '../services/empresa';
 
 @Component({
   selector: 'app-cadastro',
@@ -13,6 +14,7 @@ import { FuncionarioService } from '../services/funcionario';
 })
 export class CadastroComponent {
   cadastroForm: FormGroup;
+  tipoCadastro: 'funcionario' | 'empresa' = 'funcionario'; // Estado do toggle
 
   // Variáveis visuais
   cameraAtiva: 'rosto' | 'doc' | null = null;
@@ -28,17 +30,39 @@ export class CadastroComponent {
   constructor(
     private fb: FormBuilder,
     private funcionarioService: FuncionarioService,
-    private router: Router, // Injetando Router
-    private cdr: ChangeDetectorRef // Injetando ChangeDetectorRef
+    private empresaService: EmpresaService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
-    this.cadastroForm = this.fb.group({
-      nomeCompleto: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      cpf: ['', Validators.required],
-      senha: ['', Validators.required],
-      fotoRostoUrl: ['', Validators.required],
-      fotoDocumentoUrl: ['', Validators.required]
-    });
+    this.cadastroForm = this.initForm();
+  }
+
+  initForm(): FormGroup {
+    if (this.tipoCadastro === 'funcionario') {
+      return this.fb.group({
+        nomeCompleto: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        cpf: ['', Validators.required],
+        senha: ['', Validators.required],
+        fotoRostoUrl: ['', Validators.required],
+        fotoDocumentoUrl: ['', Validators.required]
+      });
+    } else {
+      return this.fb.group({
+        razaoSocial: ['', Validators.required],
+        nomeFantasia: ['', Validators.required],
+        cnpj: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        senha: ['', Validators.required]
+      });
+    }
+  }
+
+  alternarTipo(event: any) {
+    this.tipoCadastro = event.target.checked ? 'empresa' : 'funcionario';
+    this.cadastroForm = this.initForm();
+    this.fotoRostoPreview = null;
+    this.fotoDocPreview = null;
   }
 
   formatarCPF(event: any) {
@@ -51,6 +75,19 @@ export class CadastroComponent {
     valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 
     this.cadastroForm.get('cpf')?.setValue(valor);
+  }
+
+  formatarCNPJ(event: any) {
+    let valor = event.target.value.replace(/\D/g, '');
+    if (valor.length > 14) {
+      valor = valor.substring(0, 14);
+    }
+    valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+    valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+    valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
+    valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+
+    this.cadastroForm.get('cnpj')?.setValue(valor);
   }
 
   // --- LÓGICA DE UPLOAD (Arquivo) ---
@@ -126,14 +163,22 @@ export class CadastroComponent {
     if (this.cadastroForm.valid) {
       console.log('Iniciando envio para o servidor...');
 
-      // SIMULAÇÃO DE CADASTRO (Backend pode não estar rodando)
-      // Para usar o backend real, descomente o código abaixo e comente o setTimeout
 
-      this.funcionarioService.cadastrar(this.cadastroForm.value).subscribe({
+      const observable = this.tipoCadastro === 'funcionario'
+        ? this.funcionarioService.cadastrar(this.cadastroForm.value)
+        : this.empresaService.cadastrar(this.cadastroForm.value);
+
+      observable.subscribe({
         next: (resposta) => {
           console.log('Sucesso:', resposta);
-          this.mostrarPopupSucesso = true;
-          this.cdr.detectChanges(); // Força a atualização da tela
+
+          if (this.tipoCadastro === 'funcionario') {
+            this.mostrarPopupSucesso = true;
+            this.cdr.detectChanges();
+          } else {
+            alert('Empresa cadastrada com sucesso!');
+            this.router.navigate(['/login']);
+          }
         },
         error: (erro) => {
           console.error('Erro na requisição:', erro);
@@ -142,14 +187,9 @@ export class CadastroComponent {
         }
       });
 
-      // Simulação de sucesso após 1 segundo
-      // setTimeout(() => {
-      //   console.log('Cadastro simulado com sucesso');
-      //   this.mostrarPopupSucesso = true;
-      // }, 1000);
 
     } else {
-      alert('Por favor, preencha todos os campos corretamente antes de enviar. Verifique se as fotos foram tiradas.');
+      alert('Por favor, preencha todos os campos corretamente antes de enviar.');
     }
   }
 
@@ -158,7 +198,6 @@ export class CadastroComponent {
     this.cadastroForm.reset();
     this.fotoRostoPreview = null;
     this.fotoDocPreview = null;
-    // Redireciona para o login
     this.router.navigate(['/login']);
   }
 }
