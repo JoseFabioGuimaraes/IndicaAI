@@ -2,6 +2,12 @@ package br.com.indicaAI.API.domain.empresa;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -11,7 +17,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Empresa {
+
+public class Empresa implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,4 +45,13 @@ public class Empresa {
     public void inativar() {
         this.status = StatusEmpresa.INATIVO;
     }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_EMPRESA"));
+    }
+
+    @Override
+    public String getPassword() { return senha; }
+    @Override
+    public String getUsername() { return email; }
 }

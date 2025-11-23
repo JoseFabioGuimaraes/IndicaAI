@@ -1,11 +1,14 @@
 package br.com.indicaAI.API.controllers.funcionario;
 
+import br.com.indicaAI.API.domain.funcionario.Funcionario;
 import br.com.indicaAI.API.domain.funcionario.FuncionarioService;
 import br.com.indicaAI.API.domain.funcionario.dtos.AtualizacaoFuncionarioDTO;
 import br.com.indicaAI.API.domain.funcionario.dtos.CadastroFuncionarioDTO;
 import br.com.indicaAI.API.domain.funcionario.dtos.DetalhamentoFuncionarioDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -33,7 +36,14 @@ public class FuncionarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DetalhamentoFuncionarioDTO> detalhar(@PathVariable UUID id) {
+    public ResponseEntity<DetalhamentoFuncionarioDTO> detalhar(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails usuarioLogado
+    ) {
+        if (usuarioLogado instanceof Funcionario f && !f.getId().equals(id)) {
+            return ResponseEntity.status(403).build();
+        }
+
         var dto = funcionarioService.detalhar(id);
         return ResponseEntity.ok(dto);
     }
@@ -41,14 +51,26 @@ public class FuncionarioController {
     @PutMapping("/{id}")
     public ResponseEntity<DetalhamentoFuncionarioDTO> atualizar(
             @PathVariable UUID id,
-            @RequestBody @Valid AtualizacaoFuncionarioDTO dto
+            @RequestBody @Valid AtualizacaoFuncionarioDTO dto,
+            @AuthenticationPrincipal Funcionario funcionarioLogado
     ) {
+        if (!funcionarioLogado.getId().equals(id)) {
+            return ResponseEntity.status(403).build();
+        }
+
         var atualizado = funcionarioService.atualizar(id, dto);
         return ResponseEntity.ok(atualizado);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> inativar(@PathVariable UUID id) {
+    public ResponseEntity<Void> inativar(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Funcionario funcionarioLogado
+    ) {
+        if (!funcionarioLogado.getId().equals(id)) {
+            return ResponseEntity.status(403).build();
+        }
+
         funcionarioService.inativar(id);
         return ResponseEntity.noContent().build();
     }

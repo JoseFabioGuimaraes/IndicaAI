@@ -6,6 +6,7 @@ import br.com.indicaAI.API.domain.funcionario.dtos.DetalhamentoFuncionarioDTO;
 import br.com.indicaAI.API.domain.funcionario.mensageria.SolicitacaoValidacaoMQ;
 import br.com.indicaAI.API.infrastructure.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -17,10 +18,12 @@ public class FuncionarioService {
 
     private final FuncionarioRepository funcionarioRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final PasswordEncoder passwordEncoder;
 
-    public FuncionarioService(FuncionarioRepository funcionarioRepository, RabbitTemplate rabbitTemplate) {
+    public FuncionarioService(FuncionarioRepository funcionarioRepository, RabbitTemplate rabbitTemplate, PasswordEncoder passwordEncoder) {
         this.funcionarioRepository = funcionarioRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -36,7 +39,7 @@ public class FuncionarioService {
         novo.setNomeCompleto(dados.nomeCompleto());
         novo.setCpf(dados.cpf());
         novo.setEmail(dados.email());
-        novo.setSenha(dados.senha());
+        novo.setSenha(passwordEncoder.encode(dados.senha()));
         novo.setFotoRostoUrl(dados.fotoRostoUrl());
         novo.setFotoDocumentoUrl(dados.fotoDocumentoUrl());
 
@@ -52,7 +55,6 @@ public class FuncionarioService {
                         salvo.getFotoDocumentoUrl()
                 );
                 rabbitTemplate.convertAndSend(RabbitMQConfig.FILA_VALIDACAO_REQUEST, mensagem);
-                System.out.println("Mensagem enviada para o RabbitMQ após commit!");
             }
         });
 
@@ -69,7 +71,7 @@ public class FuncionarioService {
         var funcionario = buscarFuncionarioAtivo(id);
 
         if (dados.nomeCompleto() != null) funcionario.setNomeCompleto(dados.nomeCompleto());
-        if (dados.senha() != null) funcionario.setSenha(dados.senha());
+        if (dados.senha() != null) funcionario.setSenha(passwordEncoder.encode(dados.senha()));
         if (dados.email() != null) funcionario.setEmail(dados.email());
 
         return new DetalhamentoFuncionarioDTO(funcionario);
