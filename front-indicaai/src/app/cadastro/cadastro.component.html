@@ -1,0 +1,111 @@
+<div class="split-container">
+  <!-- Lado Esquerdo: Marca/Logo -->
+  <div class="brand-section">
+    <div class="brand-content">
+      <img src="wmremove-transformed (1).png" alt="Indica.AI Logo" class="brand-logo">
+      <h1>Indica.AI</h1>
+    </div>
+  </div>
+
+  <!-- Lado Direito: Formulário -->
+  <div class="form-section">
+    <div class="form-wrapper">
+      <div class="form-header">
+        <h2>Criar Conta</h2>
+        <p class="subtitle">Cadastre seus dados e biometria.</p>
+      </div>
+
+      <form [formGroup]="cadastroForm" (ngSubmit)="onSubmit()">
+
+        <div class="input-group">
+          <label>Nome Completo</label>
+          <input type="text" formControlName="nomeCompleto" placeholder="Seu nome completo">
+        </div>
+
+        <div class="input-group">
+          <label>CPF</label>
+          <input type="text" formControlName="cpf" placeholder="000.000.000-00" (input)="formatarCPF($event)"
+            maxlength="14">
+        </div>
+
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="email@exemplo.com">
+        </div>
+
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" formControlName="senha" placeholder="********">
+        </div>
+
+        <hr class="divider">
+
+        <!-- Foto do Rosto -->
+        <div class="media-group">
+          <label class="section-label">Foto do Rosto</label>
+
+          <div class="upload-card">
+            <div class="preview-area" *ngIf="fotoRostoPreview">
+              <img [src]="fotoRostoPreview">
+              <button type="button" class="btn-remove" (click)="fotoRostoPreview = null">×</button>
+            </div>
+
+            <div class="actions" *ngIf="cameraAtiva !== 'rosto' && !fotoRostoPreview">
+              <div class="action-btn upload" (click)="fileRosto.click()">
+                <span class="icon">📁</span>
+                <span>Carregar Foto</span>
+              </div>
+              <div class="action-btn camera" (click)="iniciarCamera('rosto')">
+                <span class="icon">📷</span>
+                <span>Usar Câmera</span>
+              </div>
+            </div>
+
+            <div class="camera-container" *ngIf="cameraAtiva === 'rosto'">
+              <video #videoElement autoplay playsinline></video>
+              <button type="button" class="btn-capture" (click)="tirarFoto()"></button>
+              <button type="button" class="btn-close-camera" (click)="pararCamera()">Cancelar</button>
+            </div>
+
+            <input #fileRosto type="file" hidden (change)="onFileSelected($event, 'rosto')">
+          </div>
+        </div>
+
+        <!-- Foto do Documento -->
+        <div class="media-group">
+          <label class="section-label">Foto do Documento</label>
+
+          <div class="upload-card">
+            <div class="preview-area" *ngIf="fotoDocPreview">
+              <img [src]="fotoDocPreview">
+              <button type="button" class="btn-remove" (click)="fotoDocPreview = null">×</button>
+            </div>
+
+            <div class="actions" *ngIf="cameraAtiva !== 'doc' && !fotoDocPreview">
+              <div class="action-btn upload" (click)="fileDoc.click()">
+                <span class="icon">📄</span>
+                <span>Carregar Foto</span>
+              </div>
+              <div class="action-btn camera" (click)="iniciarCamera('doc')">
+                <span class="icon">📷</span>
+                <span>Usar Câmera</span>
+              </div>
+            </div>
+
+            <div class="camera-container" *ngIf="cameraAtiva === 'doc'">
+              <video #videoElement autoplay playsinline></video>
+              <button type="button" class="btn-capture" (click)="tirarFoto()"></button>
+              <button type="button" class="btn-close-camera" (click)="pararCamera()">Cancelar</button>
+            </div>
+
+            <input #fileDoc type="file" hidden (change)="onFileSelected($event, 'doc')">
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="!cadastroForm.valid" class="btn-submit">
+          FINALIZAR CADASTRO
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

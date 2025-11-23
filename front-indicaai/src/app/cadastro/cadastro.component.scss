@@ -1,0 +1,287 @@
+// Variáveis de Cor
+$primary-blue: #448cf4;
+$primary-light: #e3f2fd;
+$text-dark: #333;
+$text-light: #666;
+$white: #ffffff;
+$border-color: #ddd;
+
+.split-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Inter', sans-serif; // Sugestão de fonte mais moderna
+  overflow: hidden; // Evita scroll na página inteira, apenas no form
+
+  .brand-section {
+    flex: 0 0 40%; // Aumentado para 40%
+    background: $primary-blue; // Cor sólida conforme solicitado ou gradiente sutil
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $white;
+
+    .brand-content {
+      text-align: center;
+
+      .brand-logo {
+        width: 150px; // Ajuste conforme necessário
+        height: auto;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        margin-bottom: 15px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 1px;
+      }
+    }
+
+    @media(max-width: 768px) {
+      display: none; // Esconde em mobile
+    }
+  }
+
+  .form-section {
+    flex: 1; // Ocupa o restante (65%)
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    overflow-y: auto; // Scroll apenas no form se necessário
+    padding: 20px;
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 700px; // Aumentado para compensar e deixar campos maiores
+      background: $white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+      .form-header {
+        margin-bottom: 30px;
+
+        h2 {
+          font-size: 1.8rem;
+          color: $text-dark;
+          margin-bottom: 8px;
+        }
+
+        .subtitle {
+          color: $text-light;
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+}
+
+.input-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: $text-dark;
+    font-weight: 500;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-blue;
+      box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
+    }
+  }
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 30px 0;
+}
+
+.media-group {
+  margin-bottom: 25px;
+
+  .section-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: $text-dark;
+  }
+
+  .upload-card {
+    border: 2px dashed $border-color;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    background: #fafafa;
+    position: relative;
+
+    &:hover {
+      background: $primary-light;
+      border-color: $primary-blue;
+    }
+
+    &.has-file {
+      border-style: solid;
+      padding: 10px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+
+      .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        padding: 15px;
+        border-radius: 8px;
+        background: $white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+        min-width: 100px;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon {
+          font-size: 1.5rem;
+          margin-bottom: 5px;
+        }
+
+        span {
+          font-size: 0.85rem;
+          color: $text-dark;
+        }
+      }
+    }
+
+    .upload-placeholder {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: $text-light;
+
+      .icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: $primary-blue;
+      }
+    }
+
+    .preview-area {
+      position: relative;
+
+      img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .btn-remove {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.camera-container {
+  position: relative;
+  background: black;
+  border-radius: 8px;
+  overflow: hidden;
+
+  video {
+    width: 100%;
+    display: block;
+  }
+
+  .btn-capture {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    background: $white;
+    border-radius: 50%;
+    border: 4px solid $primary-blue;
+    cursor: pointer;
+    transition: transform 0.1s;
+
+    &:active {
+      transform: translateX(-50%) scale(0.9);
+    }
+  }
+
+  .btn-close-camera {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  background: $primary-blue;
+  color: $white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 10px;
+
+  &:hover {
+    background: darken($primary-blue, 10%);
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
