@@ -28,8 +28,7 @@ public class FuncionarioController {
     @PostMapping("/cadastro")
     public ResponseEntity<DetalhamentoFuncionarioDTO> cadastrar(
             @RequestBody @Valid CadastroFuncionarioDTO dto,
-            UriComponentsBuilder uriBuilder
-    ) {
+            UriComponentsBuilder uriBuilder) {
         var funcionarioDetalhado = funcionarioService.cadastrarFuncionario(dto);
         URI uri = uriBuilder.path("/funcionarios/{id}").buildAndExpand(funcionarioDetalhado.id()).toUri();
         return ResponseEntity.created(uri).body(funcionarioDetalhado);
@@ -38,8 +37,7 @@ public class FuncionarioController {
     @GetMapping("/{id}")
     public ResponseEntity<DetalhamentoFuncionarioDTO> detalhar(
             @PathVariable UUID id,
-            @AuthenticationPrincipal UserDetails usuarioLogado
-    ) {
+            @AuthenticationPrincipal UserDetails usuarioLogado) {
         if (usuarioLogado instanceof Funcionario f && !f.getId().equals(id)) {
             return ResponseEntity.status(403).build();
         }
@@ -48,12 +46,18 @@ public class FuncionarioController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<DetalhamentoFuncionarioDTO> meuPerfil(
+            @AuthenticationPrincipal Funcionario funcionarioLogado) {
+        var dto = funcionarioService.detalhar(funcionarioLogado.getId());
+        return ResponseEntity.ok(dto);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DetalhamentoFuncionarioDTO> atualizar(
             @PathVariable UUID id,
             @RequestBody @Valid AtualizacaoFuncionarioDTO dto,
-            @AuthenticationPrincipal Funcionario funcionarioLogado
-    ) {
+            @AuthenticationPrincipal Funcionario funcionarioLogado) {
         if (!funcionarioLogado.getId().equals(id)) {
             return ResponseEntity.status(403).build();
         }
@@ -65,8 +69,7 @@ public class FuncionarioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> inativar(
             @PathVariable UUID id,
-            @AuthenticationPrincipal Funcionario funcionarioLogado
-    ) {
+            @AuthenticationPrincipal Funcionario funcionarioLogado) {
         if (!funcionarioLogado.getId().equals(id)) {
             return ResponseEntity.status(403).build();
         }

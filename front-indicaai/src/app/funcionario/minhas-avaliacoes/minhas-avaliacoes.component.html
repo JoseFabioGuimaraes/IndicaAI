@@ -1,0 +1,37 @@
+<div class="page-header">
+    <h2>Minhas Avaliações</h2>
+    <p>Acompanhe seu desempenho e feedbacks.</p>
+</div>
+
+<div *ngIf="loading" class="status-msg">
+    Carregando dados...
+</div>
+
+<div *ngIf="erroMsg" class="status-msg error">
+    {{ erroMsg }}
+</div>
+
+<div *ngIf="!loading && !erroMsg && avaliacoes.length === 0" class="status-msg">
+    Nenhuma avaliação encontrada.
+</div>
+
+<div class="cards-grid" *ngIf="!loading && avaliacoes.length > 0">
+    <div class="card-avaliacao" *ngFor="let avaliacao of avaliacoes">
+        <div class="card-header">
+            <span class="data">{{ avaliacao.dataAvaliacao | date:'dd/MM/yyyy' }}</span>
+            <span class="badge" [ngClass]="getClassePontuacao(calcularPontuacao(avaliacao.metricas))">
+                {{ calcularPontuacao(avaliacao.metricas) }} pts
+            </span>
+        </div>
+
+        <h3>Avaliação de {{ avaliacao.nomeEmpresa }}</h3>
+
+        <div class="feedback-box">
+            <p>"{{ avaliacao.descricao }}"</p>
+        </div>
+
+        <div class="card-footer">
+            <span class="autor">Avaliador: <strong>{{ avaliacao.nomeEmpresa }}</strong></span>
+        </div>
+    </div>
+</div>
