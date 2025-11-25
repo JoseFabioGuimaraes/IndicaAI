@@ -28,21 +28,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
+                .cors(Customizer.withDefaults()) // Ativa o CORS (olha para o CorsConfig)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
                     req.requestMatchers(HttpMethod.POST, "/login").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/funcionarios/cadastro").permitAll();
                     req.requestMatchers(HttpMethod.POST, "/empresas/cadastro").permitAll();
-
                     req.requestMatchers(HttpMethod.GET, "/funcionarios/**").hasAnyRole("EMPRESA", "FUNCIONARIO");
-
                     req.requestMatchers(HttpMethod.PUT, "/funcionarios/**").hasRole("FUNCIONARIO");
                     req.requestMatchers(HttpMethod.DELETE, "/funcionarios/**").hasRole("FUNCIONARIO");
-
-                    req.requestMatchers(HttpMethod.POST, "/avaliacoes").hasRole("EMPRESA");
+                    req.requestMatchers(HttpMethod.POST, "/avaliacoes/criar").hasRole("EMPRESA");
+                    req.requestMatchers(HttpMethod.POST, "/avaliacoes/*/responder").hasRole("FUNCIONARIO");
                     req.requestMatchers(HttpMethod.GET, "/avaliacoes/minhas").hasRole("FUNCIONARIO");
-
+                    req.requestMatchers(HttpMethod.GET, "/avaliacoes/funcionario/**").hasRole("EMPRESA");
                     req.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

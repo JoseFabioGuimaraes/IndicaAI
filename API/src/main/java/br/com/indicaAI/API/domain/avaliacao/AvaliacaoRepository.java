@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface AvaliacaoRepository extends JpaRepository<Avaliacao, UUID> {
     List<Avaliacao> findAllByFuncionarioId(UUID funcionarioId);
+    boolean existsByEmpresaIdAndFuncionarioId(UUID empresaId, UUID funcionarioId);
 }

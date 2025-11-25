@@ -34,6 +34,9 @@ public class Avaliacao {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    @Column(columnDefinition = "TEXT")
+    private String resposta;
+
     private LocalDateTime dataAvaliacao = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
