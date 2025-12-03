@@ -50,6 +50,7 @@ export class AuthService {
         cpf: funcionario.cpf,
         city: funcionario.cidade,
         bio: funcionario.sobre,
+        status: funcionario.status,
       };
 
       return { user, token };
@@ -60,16 +61,50 @@ export class AuthService {
   }
 
   static async register(data: RegisterDTO): Promise<User> {
-    // Keeping mock for register as we are focusing on login
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: "mock-new-id",
-          name: data.name,
-          email: data.email,
-          type: "worker",
-        });
-      }, 1000);
+    try {
+      // 1. Convert images to Base64
+      const facePhotoBase64 = await this.toBase64(data.facePhoto[0]);
+      const documentPhotoBase64 = await this.toBase64(data.documentPhoto[0]);
+
+      // 2. Prepare payload
+      const payload = {
+        nomeCompleto: data.name,
+        email: data.email,
+        senha: data.password,
+        cpf: data.cpf,
+        cidade: data.city,
+        fotoRostoUrl: facePhotoBase64,
+        fotoDocumentoUrl: documentPhotoBase64,
+        sobre: "", // Optional, can be added to form later
+      };
+
+      // 3. Call API
+      const response = await api.post<FuncionarioResponse>("/funcionarios/cadastro", payload);
+      const funcionario = response.data;
+
+      // 4. Map to User model
+      return {
+        id: funcionario.id,
+        name: funcionario.nomeCompleto,
+        email: funcionario.email,
+        type: "worker",
+        cpf: funcionario.cpf,
+        city: funcionario.cidade,
+        bio: funcionario.sobre,
+        status: funcionario.status,
+      };
+    } catch (error) {
+      console.error("Registration failed:", error);
+      throw error;
+    }
+  }
+
+  private static toBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
     });
   }
 }

@@ -21,12 +21,13 @@ export const registerSchema = z.object({
   email: z.email({ message: "Informe um e-mail válido." }),
   password: z.string().min(6, { message: "A senha deve ter no mínimo 6 caracteres." }),
   confirmPassword: z.string().min(6, { message: "A confirmação de senha deve ter no mínimo 6 caracteres." }),
-  
+
   // Worker specific fields
   cpf: z.string().optional(), // Validate format in component or custom zod rule
   motherName: z.string().optional(),
   birthDate: z.string().optional(), // ISO date string or similar
-  
+  city: z.string().optional(),
+
   // Company specific fields
   fantasyName: z.string().optional(),
   quadro: z.string().optional(), // "Quadro" as requested
@@ -34,10 +35,10 @@ export const registerSchema = z.object({
   contactEmail: z.email({ message: "Informe um e-mail de contato válido." }).optional().or(z.literal("")),
   contactPhone: z.string().optional(),
   partners: z.array(z.object({ name: z.string().min(1, "Nome do sócio é obrigatório") })).optional(),
-  
+
   // File uploads
-  documentFront: z.any().optional(),
-  documentBack: z.any().optional(),
+  facePhoto: z.any().optional(),
+  documentPhoto: z.any().optional(),
   socialContract: z.any().optional(),
 }).refine(
   (data) => data.password === data.confirmPassword,

@@ -57,7 +57,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user);
       localStorage.setItem("auth:user", JSON.stringify(user));
       localStorage.setItem("auth:token", token);
-      router.push("/profile"); // Redirect to profile
+
+      if (user.status === "PENDENTE_VALIDACAO") {
+        router.push("/pending-approval");
+      } else {
+        router.push("/profile"); // Redirect to profile
+      }
     } catch (error) {
       console.error("Login failed", error);
       // Handle error (toast etc)
@@ -72,7 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const user = await AuthService.register(data);
       setUser(user);
       localStorage.setItem("auth:user", JSON.stringify(user));
-      router.push("/profile");
+
+      if (user.status === "PENDENTE_VALIDACAO") {
+        router.push("/pending-approval");
+      } else {
+        router.push("/profile");
+      }
     } catch (error) {
       console.error("Registration failed", error);
     } finally {

@@ -7,4 +7,5 @@ export interface User {
   cnpj?: string;
   city?: string;
   bio?: string;
+  status?: string;
 }

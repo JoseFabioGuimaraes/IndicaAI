@@ -34,14 +34,15 @@ export default function WorkerRegisterForm() {
       cpf: "",
       motherName: "",
       birthDate: "",
+      city: "",
     },
     mode: "onChange",
   });
 
   const steps = [
     { id: 1, label: "Dados Pessoais" },
-    { id: 2, label: "Documento (Frente)" },
-    { id: 3, label: "Documento (Verso)" },
+    { id: 2, label: "Foto do Rosto" },
+    { id: 3, label: "Foto do Documento" },
   ];
 
   const handleNext = async () => {
@@ -55,21 +56,22 @@ export default function WorkerRegisterForm() {
         "cpf",
         "motherName",
         "birthDate",
+        "city",
       ]);
     } else if (step === 2) {
       // Validate file upload if needed, for now just check if field has value
-      // isValid = await form.trigger("documentFront");
+      // isValid = await form.trigger("facePhoto");
       // Manual check for file presence since zod trigger might be tricky with file input
-      const file = form.getValues("documentFront");
+      const file = form.getValues("facePhoto");
       isValid = !!file && file.length > 0;
       if (!isValid) {
-        form.setError("documentFront", { message: "Imagem é obrigatória." });
+        form.setError("facePhoto", { message: "Imagem é obrigatória." });
       }
     } else if (step === 3) {
-      const file = form.getValues("documentBack");
+      const file = form.getValues("documentPhoto");
       isValid = !!file && file.length > 0;
       if (!isValid) {
-        form.setError("documentBack", { message: "Imagem é obrigatória." });
+        form.setError("documentPhoto", { message: "Imagem é obrigatória." });
       }
     }
 
@@ -116,7 +118,7 @@ export default function WorkerRegisterForm() {
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-muted-foreground bg-background",
                 (completedSteps.includes(s.id) || step > s.id) &&
-                  "border-primary bg-primary text-primary-foreground"
+                "border-primary bg-primary text-primary-foreground"
               )}
             >
               {completedSteps.includes(s.id) || step > s.id ? (
@@ -193,6 +195,19 @@ export default function WorkerRegisterForm() {
               />
               <FormField
                 control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Sua cidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -237,15 +252,15 @@ export default function WorkerRegisterForm() {
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="text-center mb-4">
                 <h3 className="text-lg font-medium">
-                  Foto do Documento (Frente)
+                  Foto do Rosto
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Envie uma foto legível da frente do seu RG ou CNH.
+                  Envie uma foto legível do seu rosto (selfie).
                 </p>
               </div>
               <FormField
                 control={form.control}
-                name="documentFront"
+                name="facePhoto"
                 render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
                     <FormControl>
@@ -295,15 +310,15 @@ export default function WorkerRegisterForm() {
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="text-center mb-4">
                 <h3 className="text-lg font-medium">
-                  Foto do Documento (Verso)
+                  Foto do Documento
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Envie uma foto legível do verso do seu RG ou CNH.
+                  Envie uma foto legível do seu documento (Frente).
                 </p>
               </div>
               <FormField
                 control={form.control}
-                name="documentBack"
+                name="documentPhoto"
                 render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
                     <FormControl>
