@@ -10,9 +10,10 @@ import { format } from "date-fns";
 
 interface ReviewListProps {
   reviews: Review[];
+  userName: string;
 }
 
-export function ReviewList({ reviews }: ReviewListProps) {
+export function ReviewList({ reviews, userName }: ReviewListProps) {
   if (!reviews || reviews.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -48,6 +49,14 @@ export function ReviewList({ reviews }: ReviewListProps) {
             <p className="text-sm text-foreground/80 leading-relaxed">
               {review.comment}
             </p>
+            {review.reply && (
+              <div className="mt-4 bg-muted p-3 rounded-md text-sm">
+                <p className="font-semibold text-xs text-muted-foreground mb-1">
+                  Resposta de {userName}:
+                </p>
+                <p className="text-foreground/90">{review.reply}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}

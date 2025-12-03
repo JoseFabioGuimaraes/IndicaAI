@@ -14,6 +14,7 @@ export const ReviewSchema = z.object({
   targetId: z.string(),
   rating: z.number().min(1).max(5),
   comment: z.string().min(1, "Comment cannot be empty"),
+  reply: z.string().optional(),
   createdAt: z.date(),
 });
 
@@ -24,6 +25,7 @@ export const WorkerProfileSchema = z.object({
   fullName: z.string(),
   cpf: z.string(),
   email: z.string().email(),
+  city: z.string().optional(),
   phone: z.string().optional(),
   bio: z.string().optional(),
   skills: z.array(z.string()).optional(),

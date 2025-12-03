@@ -53,10 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(data: LoginDTO) {
     setLoading(true);
     try {
-      const user = await AuthService.login(data);
+      const { user, token } = await AuthService.login(data);
       setUser(user);
       localStorage.setItem("auth:user", JSON.stringify(user));
-      router.push("/dashboard"); // Or home
+      localStorage.setItem("auth:token", token);
+      router.push("/profile"); // Redirect to profile
     } catch (error) {
       console.error("Login failed", error);
       // Handle error (toast etc)
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const user = await AuthService.register(data);
       setUser(user);
       localStorage.setItem("auth:user", JSON.stringify(user));
-      router.push("/dashboard");
+      router.push("/profile");
     } catch (error) {
       console.error("Registration failed", error);
     } finally {

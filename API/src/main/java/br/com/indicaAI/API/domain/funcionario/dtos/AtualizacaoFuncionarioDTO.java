@@ -5,6 +5,8 @@ import java.util.UUID;
 public record AtualizacaoFuncionarioDTO(
         String nomeCompleto,
         String senha,
-        String email
+        String email,
+        String cidade,
+        String sobre
 ) {
 }

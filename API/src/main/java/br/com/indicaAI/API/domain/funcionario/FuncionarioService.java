@@ -42,6 +42,8 @@ public class FuncionarioService {
         novo.setSenha(passwordEncoder.encode(dados.senha()));
         novo.setFotoRostoUrl(dados.fotoRostoUrl());
         novo.setFotoDocumentoUrl(dados.fotoDocumentoUrl());
+        novo.setCidade(dados.cidade());
+        novo.setSobre(dados.sobre());
 
         novo.setStatus(StatusFuncionario.PENDENTE_VALIDACAO);
 
@@ -73,6 +75,8 @@ public class FuncionarioService {
         if (dados.nomeCompleto() != null) funcionario.setNomeCompleto(dados.nomeCompleto());
         if (dados.senha() != null) funcionario.setSenha(passwordEncoder.encode(dados.senha()));
         if (dados.email() != null) funcionario.setEmail(dados.email());
+        if (dados.cidade() != null) funcionario.setCidade(dados.cidade());
+        if (dados.sobre() != null) funcionario.setSobre(dados.sobre());
 
         return new DetalhamentoFuncionarioDTO(funcionario);
     }

@@ -57,7 +57,7 @@ export function WorkerProfile({ profile }: WorkerProfileProps) {
             )}
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              São Paulo, SP
+              {profile.city || "Cidade não informada"}
             </div>
           </div>
 
@@ -118,7 +118,7 @@ export function WorkerProfile({ profile }: WorkerProfileProps) {
             </h2>
           </div>
 
-          <ReviewList reviews={profile.reviews || []} />
+          <ReviewList reviews={profile.reviews || []} userName={profile.fullName} />
         </div>
       </div>
     </div>

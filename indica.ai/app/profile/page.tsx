@@ -1,61 +1,74 @@
-import { Suspense } from "react";
-import { profileService } from "@/lib/services/profile.service";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/features/authentication/hooks/useAuth";
+import { EvaluationService } from "@/features/evaluations/services/evaluation.service";
 import { WorkerProfile } from "@/features/person/components/worker-profile";
-import { CompanyProfile } from "@/features/business/components/company-profile";
-import { Button } from "@/shared/components/ui/button";
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Review, WorkerProfile as WorkerProfileType } from "@/lib/schemas/profile.schema";
+import { Spinner } from "@/shared/components/ui/spinner";
+import { useRouter } from "next/navigation";
 
-// This is a temporary mock to simulate a logged-in user
-// In a real app, you'd get the session from cookies/headers
-const MOCK_USER_ID = "worker-1"; // Change to "company-1" to test company view
-// const MOCK_USER_ID = "company-1";
+export default function ProfilePage() {
+  const { user, loading } = useAuth();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [fetchingReviews, setFetchingReviews] = useState(true);
+  const router = useRouter();
 
-export default async function ProfilePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
-  // Allow overriding user via query param for testing: /profile?userId=company-1
-  const userId = (params.userId as string) || MOCK_USER_ID;
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
-  // Try to find as worker first
-  const workerProfile = await profileService.getWorkerProfile(userId);
+  useEffect(() => {
+    async function fetchReviews() {
+      if (user?.type === "worker") {
+        const data = await EvaluationService.getMyEvaluations();
+        setReviews(data);
+      }
+      setFetchingReviews(false);
+    }
 
-  if (workerProfile) {
+    if (user) {
+      fetchReviews();
+    }
+  }, [user]);
+
+  if (loading || fetchingReviews) {
     return (
-      <div className="container py-10">
-        <WorkerProfile profile={workerProfile} />
+      <div className="flex justify-center items-center h-screen">
+        <Spinner />
       </div>
     );
   }
 
-  // Try to find as company
-  const companyProfile = await profileService.getCompanyProfile(userId);
+  if (!user) return null;
 
-  if (companyProfile) {
-    return (
-      <div className="container py-10">
-        <CompanyProfile profile={companyProfile} />
-      </div>
-    );
-  }
+  // Calculate stats
+  const totalReviews = reviews.length;
+  const averageRating =
+    totalReviews > 0
+      ? reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews
+      : 0;
+
+  const profile: WorkerProfileType = {
+    userId: user.id,
+    fullName: user.name,
+    email: user.email,
+    cpf: user.cpf || "",
+    averageRating,
+    totalReviews,
+    reviews,
+    // Optional fields not yet in User model
+    phone: "",
+    bio: user.bio,
+    city: user.city,
+    skills: [],
+  };
 
   return (
-    <div className="container py-20 text-center space-y-4">
-      <h1 className="text-2xl font-bold">Profile Not Found</h1>
-      <p className="text-muted-foreground">
-        Could not find a profile for user ID: {userId}
-      </p>
-      <div className="flex justify-center gap-4">
-        <Link href="/profile?userId=worker-1">
-          <Button variant="outline">View Worker Mock</Button>
-        </Link>
-        <Link href="/profile?userId=company-1">
-          <Button variant="outline">View Company Mock</Button>
-        </Link>
-      </div>
+    <div className="container py-10">
+      <WorkerProfile profile={profile} />
     </div>
   );
 }

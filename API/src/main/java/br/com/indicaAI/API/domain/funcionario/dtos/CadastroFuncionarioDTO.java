@@ -24,6 +24,9 @@ public record CadastroFuncionarioDTO(
         String fotoRostoUrl,
 
         @NotBlank(message = "A URL da foto do documento é obrigatória")
-        String fotoDocumentoUrl
+        String fotoDocumentoUrl,
+
+        String cidade,
+        String sobre
 ) {
 }

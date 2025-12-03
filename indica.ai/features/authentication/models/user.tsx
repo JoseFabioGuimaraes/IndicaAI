@@ -5,4 +5,6 @@ export interface User {
   type: "worker" | "company";
   cpf?: string;
   cnpj?: string;
+  city?: string;
+  bio?: string;
 }

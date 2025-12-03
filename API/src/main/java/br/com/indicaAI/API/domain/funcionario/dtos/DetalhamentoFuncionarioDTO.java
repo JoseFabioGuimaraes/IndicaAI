@@ -9,7 +9,9 @@ public record DetalhamentoFuncionarioDTO(
         String nomeCompleto,
         String email,
         String cpf,
-        StatusFuncionario status
+        StatusFuncionario status,
+        String cidade,
+        String sobre
 ) {
     public DetalhamentoFuncionarioDTO(Funcionario funcionario) {
         this(
@@ -17,7 +19,9 @@ public record DetalhamentoFuncionarioDTO(
                 funcionario.getNomeCompleto(),
                 funcionario.getEmail(),
                 funcionario.getCpf(),
-                funcionario.getStatus()
+                funcionario.getStatus(),
+                funcionario.getCidade(),
+                funcionario.getSobre()
         );
     }
 }

@@ -48,6 +48,12 @@ public class Funcionario implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_FUNCIONARIO"));
     }
 
+    @Column(length = 255)
+    private String cidade;
+
+    @Column(columnDefinition = "TEXT")
+    private String sobre;
+
     @Override
     public String getPassword() {
         return senha;
