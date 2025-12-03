@@ -26,7 +26,8 @@ public class EmpresaController {
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<InformacoesEmpresaDTO> cadastrar(@RequestBody @Valid CadastroEmpresaDTO dto, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<InformacoesEmpresaDTO> cadastrar(@RequestBody @Valid CadastroEmpresaDTO dto,
+            UriComponentsBuilder uriBuilder) {
         Empresa novaEmpresa = empresaService.cadastrarEmpresa(dto);
         URI uri = uriBuilder.path("/empresas/{id}").buildAndExpand(novaEmpresa.getId()).toUri();
         return ResponseEntity.created(uri).body(new InformacoesEmpresaDTO(novaEmpresa));
@@ -49,6 +50,13 @@ public class EmpresaController {
     @GetMapping("/{id}")
     public ResponseEntity<InformacoesEmpresaDTO> detalhar(@PathVariable UUID id) {
         var dto = empresaService.detalharEmpresa(id);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<InformacoesEmpresaDTO> meuPerfil(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal Empresa empresaLogada) {
+        var dto = empresaService.detalharEmpresa(empresaLogada.getId());
         return ResponseEntity.ok(dto);
     }
 
