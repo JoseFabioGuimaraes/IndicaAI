@@ -13,13 +13,14 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Mail, Phone, MapPin, Briefcase } from "lucide-react";
+import { Mail, Phone, MapPin, Briefcase, LogOut } from "lucide-react";
 
 interface WorkerProfileProps {
   profile: WorkerProfileType;
+  onLogout?: () => void;
 }
 
-export function WorkerProfile({ profile }: WorkerProfileProps) {
+export function WorkerProfile({ profile, onLogout }: WorkerProfileProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header Section */}
@@ -34,14 +35,26 @@ export function WorkerProfile({ profile }: WorkerProfileProps) {
         </Avatar>
 
         <div className="flex-1 space-y-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {profile.fullName}
-            </h1>
-            <p className="text-muted-foreground flex items-center gap-2 mt-1">
-              <Briefcase className="w-4 h-4" />
-              Worker
-            </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {profile.fullName}
+              </h1>
+              <p className="text-muted-foreground flex items-center gap-2 mt-1">
+                <Briefcase className="w-4 h-4" />
+                Worker
+              </p>
+            </div>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
+                title="Sair para seleção"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">

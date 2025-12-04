@@ -9,7 +9,7 @@ import { Spinner } from "@/shared/components/ui/spinner";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logoutToSelection } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [fetchingReviews, setFetchingReviews] = useState(true);
   const router = useRouter();
@@ -68,7 +68,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container py-10">
-      <WorkerProfile profile={profile} />
+      <WorkerProfile profile={profile} onLogout={logoutToSelection} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ interface AuthContextProps {
   login: (data: LoginDTO) => Promise<void>;
   register: (data: RegisterDTO) => Promise<void>;
   logout: () => void;
+  logoutToSelection: () => void;
 }
 
 export const AuthContext = createContext<AuthContextProps | null>(null);
@@ -91,13 +92,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   function logout() {
+    const userType = user?.type;
     setUser(null);
     localStorage.removeItem("auth:user");
+    localStorage.removeItem("auth:token");
+
+    if (userType === "worker") {
+      router.push("/login?type=worker");
+    } else {
+      router.push("/selection");
+    }
+  }
+
+  function logoutToSelection() {
+    setUser(null);
+    localStorage.removeItem("auth:user");
+    localStorage.removeItem("auth:token");
     router.push("/selection");
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, logoutToSelection }}>
       {children}
     </AuthContext.Provider>
   );

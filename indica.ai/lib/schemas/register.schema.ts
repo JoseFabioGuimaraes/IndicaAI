@@ -30,16 +30,11 @@ export const registerSchema = z.object({
 
   // Company specific fields
   fantasyName: z.string().optional(),
-  quadro: z.string().optional(), // "Quadro" as requested
-  creationDate: z.string().optional(),
-  contactEmail: z.email({ message: "Informe um e-mail de contato válido." }).optional().or(z.literal("")),
-  contactPhone: z.string().optional(),
-  partners: z.array(z.object({ name: z.string().min(1, "Nome do sócio é obrigatório") })).optional(),
+  cnpj: z.string().optional(),
 
   // File uploads
   facePhoto: z.any().optional(),
   documentPhoto: z.any().optional(),
-  socialContract: z.any().optional(),
 }).refine(
   (data) => data.password === data.confirmPassword,
   {
