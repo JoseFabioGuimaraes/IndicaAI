@@ -9,6 +9,8 @@ import br.com.indicaAI.API.domain.empresa.dtos.InformacoesEmpresaDTO;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -55,9 +57,12 @@ public class EmpresaController {
 
     @GetMapping("/me")
     public ResponseEntity<InformacoesEmpresaDTO> meuPerfil(
-            @org.springframework.security.core.annotation.AuthenticationPrincipal Empresa empresaLogada) {
-        var dto = empresaService.detalharEmpresa(empresaLogada.getId());
-        return ResponseEntity.ok(dto);
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails instanceof Empresa empresaLogada) {
+            var dto = empresaService.detalharEmpresa(empresaLogada.getId());
+            return ResponseEntity.ok(dto);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/alterar-senha")

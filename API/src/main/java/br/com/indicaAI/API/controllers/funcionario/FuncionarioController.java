@@ -48,9 +48,12 @@ public class FuncionarioController {
 
     @GetMapping("/me")
     public ResponseEntity<DetalhamentoFuncionarioDTO> meuPerfil(
-            @AuthenticationPrincipal Funcionario funcionarioLogado) {
-        var dto = funcionarioService.detalhar(funcionarioLogado.getId());
-        return ResponseEntity.ok(dto);
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails instanceof Funcionario funcionarioLogado) {
+            var dto = funcionarioService.detalhar(funcionarioLogado.getId());
+            return ResponseEntity.ok(dto);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
