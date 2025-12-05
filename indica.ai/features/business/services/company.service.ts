@@ -64,4 +64,20 @@ export const CompanyService = {
         });
         return response.data;
     },
+
+    createEvaluation: async (token: string, data: CreateEvaluationDTO): Promise<Evaluation> => {
+        const response = await api.post<Evaluation>("/avaliacoes/criar", data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    },
 };
+
+export interface CreateEvaluationDTO {
+    funcionarioId: string;
+    empresaId: string;
+    nota: number;
+    descricao: string;
+}
