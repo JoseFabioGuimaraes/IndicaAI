@@ -2,20 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { CompanyService, Worker } from "@/features/business/services/company.service";
+import { CompanyService, Worker, Evaluation } from "@/features/business/services/company.service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { ArrowLeft, MapPin, Mail } from "lucide-react";
+import { ArrowLeft, MapPin, Mail, Star } from "lucide-react";
 
 export default function WorkerProfilePage() {
     const params = useParams();
     const router = useRouter();
     const [worker, setWorker] = useState<Worker | null>(null);
+    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchWorker = async () => {
+        const fetchData = async () => {
             const token = localStorage.getItem("auth:token");
             if (!token) {
                 router.push("/");
@@ -23,22 +24,20 @@ export default function WorkerProfilePage() {
             }
 
             try {
-                // We can reuse the search endpoint or create a specific one.
-                // For now, let's assume we can fetch by ID or use the search endpoint to find the specific worker.
-                // Ideally, we should have a getById endpoint.
-                // Since we don't have a direct getById in CompanyService yet, let's add it or use a workaround.
-                // Actually, let's add getWorkerById to CompanyService first.
-                const data = await CompanyService.getWorkerById(token, params.id as string);
-                setWorker(data);
+                const workerData = await CompanyService.getWorkerById(token, params.id as string);
+                setWorker(workerData);
+
+                const evaluationsData = await CompanyService.getWorkerEvaluations(token, params.id as string);
+                setEvaluations(evaluationsData);
             } catch (error) {
-                console.error("Failed to fetch worker", error);
+                console.error("Failed to fetch data", error);
             } finally {
                 setLoading(false);
             }
         };
 
         if (params.id) {
-            fetchWorker();
+            fetchData();
         }
     }, [params.id, router]);
 
@@ -87,6 +86,51 @@ export default function WorkerProfilePage() {
                             <p className="text-muted-foreground">{worker.sobre}</p>
                         </CardContent>
                     </Card>
+
+                    <div className="mt-8">
+                        <h2 className="text-2xl font-bold mb-4">Histórico de Avaliações</h2>
+                        {evaluations.length === 0 ? (
+                            <p className="text-muted-foreground">Nenhuma avaliação encontrada para este profissional.</p>
+                        ) : (
+                            <div className="space-y-6">
+                                {evaluations.map((evaluation) => (
+                                    <Card key={evaluation.id}>
+                                        <CardContent className="pt-6">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h3 className="font-semibold text-lg">{evaluation.nomeEmpresa}</h3>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Avaliado em {new Date(evaluation.dataAvaliacao).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md">
+                                                    <Star className="w-4 h-4 fill-current" />
+                                                    <span className="font-bold">
+                                                        {((evaluation.metricas.assiduidade + evaluation.metricas.tecnica + evaluation.metricas.comportamental) / 3).toFixed(1)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-muted/30 p-4 rounded-md mb-4">
+                                                <p className="text-sm italic">"{evaluation.descricao}"</p>
+                                            </div>
+
+                                            {evaluation.resposta && (
+                                                <div className="ml-8 mt-4 bg-blue-50 dark:bg-blue-950/30 p-4 rounded-md border-l-4 border-blue-500">
+                                                    <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                                                        Resposta de {evaluation.nomeFuncionario}:
+                                                    </p>
+                                                    <p className="text-sm text-foreground">
+                                                        {evaluation.resposta}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

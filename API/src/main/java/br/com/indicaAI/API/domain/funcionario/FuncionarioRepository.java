@@ -13,6 +13,6 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, UUID> 
 
     Funcionario findByEmail(String email);
 
-    java.util.List<Funcionario> findAllByNomeCompletoContainingIgnoreCase(String nome);
+    java.util.List<Funcionario> findAllByNomeCompletoContainingIgnoreCaseOrCpfContaining(String nome, String cpf);
 
 }

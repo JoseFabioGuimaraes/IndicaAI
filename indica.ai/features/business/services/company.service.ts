@@ -59,4 +59,13 @@ export const CompanyService = {
         });
         return response.data;
     },
+
+    getWorkerEvaluations: async (token: string, workerId: string): Promise<Evaluation[]> => {
+        const response = await api.get<Evaluation[]>(`/avaliacoes/funcionario/${workerId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    },
 };

@@ -103,8 +103,8 @@ public class FuncionarioService {
         return funcionario;
     }
 
-    public java.util.List<DetalhamentoFuncionarioDTO> buscarPorNome(String nome) {
-        var lista = funcionarioRepository.findAllByNomeCompletoContainingIgnoreCase(nome);
+    public java.util.List<DetalhamentoFuncionarioDTO> buscarPorNome(String termo) {
+        var lista = funcionarioRepository.findAllByNomeCompletoContainingIgnoreCaseOrCpfContaining(termo, termo);
         return lista.stream()
                 .filter(f -> f.getStatus() == StatusFuncionario.ATIVO)
                 .map(DetalhamentoFuncionarioDTO::new)
