@@ -80,4 +80,11 @@ public class FuncionarioController {
         funcionarioService.inativar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<java.util.List<DetalhamentoFuncionarioDTO>> buscar(
+            @RequestParam String termo) {
+        var lista = funcionarioService.buscarPorNome(termo);
+        return ResponseEntity.ok(lista);
+    }
 }

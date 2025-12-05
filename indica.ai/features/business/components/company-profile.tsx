@@ -11,11 +11,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Mail, Phone, Globe, Building2, Search, LogOut, Star } from "lucide-react";
+import { Mail, Phone, Globe, Building2, Search, LogOut, Star, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CompanyService, Evaluation } from "../services/company.service";
+import { CompanyService, Evaluation, Worker } from "../services/company.service";
 
 interface CompanyProfileProps {
   profile: CompanyProfileType;
@@ -24,7 +24,12 @@ interface CompanyProfileProps {
 
 export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingEvaluations, setLoadingEvaluations] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<Worker[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const fetchEvaluations = async () => {
@@ -36,14 +41,32 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
         } catch (error) {
           console.error("Failed to fetch evaluations", error);
         } finally {
-          setLoading(false);
+          setLoadingEvaluations(false);
         }
       } else {
-        setLoading(false);
+        setLoadingEvaluations(false);
       }
     };
     fetchEvaluations();
   }, []);
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+
+    setSearching(true);
+    setHasSearched(true);
+    const token = localStorage.getItem("auth:token");
+    if (token) {
+      try {
+        const results = await CompanyService.searchWorkers(token, searchTerm);
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Failed to search workers", error);
+      } finally {
+        setSearching(false);
+      }
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
@@ -106,14 +129,6 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
           </div>
         </div>
 
-        <div className="shrink-0">
-          <Link href="/search">
-            <Button size="lg" className="gap-2 shadow-lg">
-              <Search className="w-4 h-4" />
-              Search Workers
-            </Button>
-          </Link>
-        </div>
       </div>
 
       <div className="mt-8">
@@ -128,7 +143,7 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
                 <CardTitle>Avaliações Realizadas</CardTitle>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {loadingEvaluations ? (
                   <p className="text-center py-8 text-muted-foreground">Carregando...</p>
                 ) : evaluations.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
@@ -180,20 +195,60 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
                 <CardTitle>Pesquisar Profissionais</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-4">
+                <div className="flex gap-4 mb-6">
                   <div className="relative flex-1">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <input
                       type="search"
-                      placeholder="Buscar por nome, cargo ou habilidades..."
+                      placeholder="Buscar por nome..."
                       className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
-                  <Button>Buscar</Button>
+                  <Button onClick={handleSearch} disabled={searching}>
+                    {searching ? "Buscando..." : "Buscar"}
+                  </Button>
                 </div>
-                <div className="mt-8 text-center text-muted-foreground">
-                  <p>Utilize a barra de pesquisa para encontrar profissionais.</p>
-                </div>
+
+                {hasSearched && (
+                  <div className="space-y-4">
+                    {searching ? (
+                      <p className="text-center py-8 text-muted-foreground">Buscando...</p>
+                    ) : searchResults.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        Nenhum profissional encontrado.
+                      </p>
+                    ) : (
+                      searchResults.map((worker) => (
+                        <div key={worker.id} className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={worker.fotoRostoUrl} />
+                            <AvatarFallback>{worker.nomeCompleto.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <h3 className="font-semibold">{worker.nomeCompleto}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                              <MapPin className="w-3 h-3" />
+                              {worker.cidade}
+                            </div>
+                            <p className="text-sm mt-2 line-clamp-2">{worker.sobre}</p>
+                          </div>
+                          <Link href={`/worker/${worker.id}`}>
+                            <Button variant="outline" size="sm">Ver Perfil</Button>
+                          </Link>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {!hasSearched && (
+                  <div className="mt-8 text-center text-muted-foreground">
+                    <p>Utilize a barra de pesquisa para encontrar profissionais pelo nome.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

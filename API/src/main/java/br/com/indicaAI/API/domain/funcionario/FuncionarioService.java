@@ -20,7 +20,8 @@ public class FuncionarioService {
     private final RabbitTemplate rabbitTemplate;
     private final PasswordEncoder passwordEncoder;
 
-    public FuncionarioService(FuncionarioRepository funcionarioRepository, RabbitTemplate rabbitTemplate, PasswordEncoder passwordEncoder) {
+    public FuncionarioService(FuncionarioRepository funcionarioRepository, RabbitTemplate rabbitTemplate,
+            PasswordEncoder passwordEncoder) {
         this.funcionarioRepository = funcionarioRepository;
         this.rabbitTemplate = rabbitTemplate;
         this.passwordEncoder = passwordEncoder;
@@ -54,8 +55,7 @@ public class FuncionarioService {
                 var mensagem = new SolicitacaoValidacaoMQ(
                         salvo.getId(),
                         salvo.getFotoRostoUrl(),
-                        salvo.getFotoDocumentoUrl()
-                );
+                        salvo.getFotoDocumentoUrl());
                 rabbitTemplate.convertAndSend(RabbitMQConfig.FILA_VALIDACAO_REQUEST, mensagem);
             }
         });
@@ -72,11 +72,16 @@ public class FuncionarioService {
     public DetalhamentoFuncionarioDTO atualizar(UUID id, AtualizacaoFuncionarioDTO dados) {
         var funcionario = buscarFuncionarioAtivo(id);
 
-        if (dados.nomeCompleto() != null) funcionario.setNomeCompleto(dados.nomeCompleto());
-        if (dados.senha() != null) funcionario.setSenha(passwordEncoder.encode(dados.senha()));
-        if (dados.email() != null) funcionario.setEmail(dados.email());
-        if (dados.cidade() != null) funcionario.setCidade(dados.cidade());
-        if (dados.sobre() != null) funcionario.setSobre(dados.sobre());
+        if (dados.nomeCompleto() != null)
+            funcionario.setNomeCompleto(dados.nomeCompleto());
+        if (dados.senha() != null)
+            funcionario.setSenha(passwordEncoder.encode(dados.senha()));
+        if (dados.email() != null)
+            funcionario.setEmail(dados.email());
+        if (dados.cidade() != null)
+            funcionario.setCidade(dados.cidade());
+        if (dados.sobre() != null)
+            funcionario.setSobre(dados.sobre());
 
         return new DetalhamentoFuncionarioDTO(funcionario);
     }
@@ -96,5 +101,13 @@ public class FuncionarioService {
         }
 
         return funcionario;
+    }
+
+    public java.util.List<DetalhamentoFuncionarioDTO> buscarPorNome(String nome) {
+        var lista = funcionarioRepository.findAllByNomeCompletoContainingIgnoreCase(nome);
+        return lista.stream()
+                .filter(f -> f.getStatus() == StatusFuncionario.ATIVO)
+                .map(DetalhamentoFuncionarioDTO::new)
+                .toList();
     }
 }
