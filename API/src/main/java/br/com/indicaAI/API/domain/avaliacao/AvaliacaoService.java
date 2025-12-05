@@ -42,11 +42,7 @@ public class AvaliacaoService {
         avaliacao.setDescricao(dados.descricao());
         avaliacao.setStatus(StatusAvaliacao.PUBLICADA);
 
-        MetricasAvaliacao metricas = new MetricasAvaliacao(
-                dados.notaAssiduidade(),
-                dados.notaTecnica(),
-                dados.notaComportamental());
-        avaliacao.setMetricas(metricas);
+        avaliacao.setNota(dados.nota());
 
         avaliacaoRepository.save(avaliacao);
         return new DetalhamentoAvaliacaoDTO(avaliacao);

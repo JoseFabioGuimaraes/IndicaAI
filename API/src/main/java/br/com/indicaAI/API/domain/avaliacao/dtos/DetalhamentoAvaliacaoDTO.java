@@ -10,20 +10,18 @@ public record DetalhamentoAvaliacaoDTO(
         UUID id,
         String nomeEmpresa,
         String nomeFuncionario,
-        MetricasAvaliacao metricas,
+        Integer nota,
         String descricao,
         String resposta,
-        LocalDateTime dataAvaliacao
-) {
+        LocalDateTime dataAvaliacao) {
     public DetalhamentoAvaliacaoDTO(Avaliacao avaliacao) {
         this(
                 avaliacao.getId(),
                 avaliacao.getEmpresa().getNomeFantasia(), // ou razaoSocial
                 avaliacao.getFuncionario().getNomeCompleto(),
-                avaliacao.getMetricas(),
+                avaliacao.getNota(),
                 avaliacao.getDescricao(),
                 avaliacao.getResposta(),
-                avaliacao.getDataAvaliacao()
-        );
+                avaliacao.getDataAvaliacao());
     }
 }

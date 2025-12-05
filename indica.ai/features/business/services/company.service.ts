@@ -8,11 +8,7 @@ export interface Evaluation {
     id: string;
     nomeEmpresa: string;
     nomeFuncionario: string;
-    metricas: {
-        assiduidade: number;
-        tecnica: number;
-        comportamental: number;
-    };
+    nota: number;
     descricao: string;
     resposta: string | null;
     dataAvaliacao: string;

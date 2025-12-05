@@ -106,7 +106,7 @@ export default function WorkerProfilePage() {
                                                 <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md">
                                                     <Star className="w-4 h-4 fill-current" />
                                                     <span className="font-bold">
-                                                        {((evaluation.metricas.assiduidade + evaluation.metricas.tecnica + evaluation.metricas.comportamental) / 3).toFixed(1)}
+                                                        {evaluation.nota ? evaluation.nota.toFixed(1) : "N/A"}
                                                     </span>
                                                 </div>
                                             </div>

@@ -28,8 +28,7 @@ public class Avaliacao {
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
 
-    @Embedded
-    private MetricasAvaliacao metricas;
+    private Integer nota;
 
     @Column(columnDefinition = "TEXT")
     private String descricao;
