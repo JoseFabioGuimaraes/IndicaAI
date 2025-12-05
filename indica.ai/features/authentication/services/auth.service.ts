@@ -21,6 +21,17 @@ interface FuncionarioResponse {
   sobre: string;
 }
 
+interface EmpresaResponse {
+  id: string;
+  razaoSocial: string;
+  email: string;
+  cnpj: string;
+  status: string;
+  nomeFantasia: string;
+  cidade: string;
+  sobre: string;
+}
+
 export class AuthService {
   static async login(data: LoginDTO): Promise<{ user: User; token: string }> {
     try {
@@ -62,37 +73,63 @@ export class AuthService {
 
   static async register(data: RegisterDTO): Promise<User> {
     try {
-      // 1. Convert images to Base64
-      const facePhotoBase64 = await this.toBase64(data.facePhoto[0]);
-      const documentPhotoBase64 = await this.toBase64(data.documentPhoto[0]);
+      if (data.cnpj) {
+        // Company Registration
+        const payload = {
+          razaoSocial: data.name,
+          email: data.email,
+          senha: data.password,
+          cnpj: data.cnpj,
+          nomeFantasia: data.fantasyName,
+        };
 
-      // 2. Prepare payload
-      const payload = {
-        nomeCompleto: data.name,
-        email: data.email,
-        senha: data.password,
-        cpf: data.cpf,
-        cidade: data.city,
-        fotoRostoUrl: facePhotoBase64,
-        fotoDocumentoUrl: documentPhotoBase64,
-        sobre: "", // Optional, can be added to form later
-      };
+        const response = await api.post<EmpresaResponse>("/empresas/cadastro", payload);
+        const empresa = response.data;
 
-      // 3. Call API
-      const response = await api.post<FuncionarioResponse>("/funcionarios/cadastro", payload);
-      const funcionario = response.data;
+        return {
+          id: empresa.id,
+          name: empresa.razaoSocial,
+          email: empresa.email,
+          type: "company",
+          cnpj: empresa.cnpj,
+          city: empresa.cidade,
+          bio: empresa.sobre,
+          status: empresa.status,
+        };
+      } else {
+        // Worker Registration
+        // 1. Convert images to Base64
+        const facePhotoBase64 = data.facePhoto && data.facePhoto[0] ? await this.toBase64(data.facePhoto[0]) : "";
+        const documentPhotoBase64 = data.documentPhoto && data.documentPhoto[0] ? await this.toBase64(data.documentPhoto[0]) : "";
 
-      // 4. Map to User model
-      return {
-        id: funcionario.id,
-        name: funcionario.nomeCompleto,
-        email: funcionario.email,
-        type: "worker",
-        cpf: funcionario.cpf,
-        city: funcionario.cidade,
-        bio: funcionario.sobre,
-        status: funcionario.status,
-      };
+        // 2. Prepare payload
+        const payload = {
+          nomeCompleto: data.name,
+          email: data.email,
+          senha: data.password,
+          cpf: data.cpf,
+          cidade: data.city,
+          fotoRostoUrl: facePhotoBase64,
+          fotoDocumentoUrl: documentPhotoBase64,
+          sobre: "",
+        };
+
+        // 3. Call API
+        const response = await api.post<FuncionarioResponse>("/funcionarios/cadastro", payload);
+        const funcionario = response.data;
+
+        // 4. Map to User model
+        return {
+          id: funcionario.id,
+          name: funcionario.nomeCompleto,
+          email: funcionario.email,
+          type: "worker",
+          cpf: funcionario.cpf,
+          city: funcionario.cidade,
+          bio: funcionario.sobre,
+          status: funcionario.status,
+        };
+      }
     } catch (error) {
       console.error("Registration failed:", error);
       throw error;

@@ -48,6 +48,12 @@ export default function CompanyRegisterForm() {
       "cnpj",
     ]);
 
+    const cnpj = form.getValues("cnpj");
+    if (!cnpj) {
+      form.setError("cnpj", { message: "CNPJ é obrigatório." });
+      return;
+    }
+
     if (isValid) {
       // Submit
       await form.handleSubmit(onSubmit)();
@@ -56,7 +62,7 @@ export default function CompanyRegisterForm() {
 
 
   async function onSubmit(values: RegisterSchema) {
-    await register(values);
+    await register({ ...values, type: "company" } as any);
   }
 
   return (

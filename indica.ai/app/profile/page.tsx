@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/features/authentication/hooks/useAuth";
 import { EvaluationService } from "@/features/evaluations/services/evaluation.service";
 import { WorkerProfile } from "@/features/person/components/worker-profile";
-import { Review, WorkerProfile as WorkerProfileType } from "@/lib/schemas/profile.schema";
+import { CompanyProfile } from "@/features/business/components/company-profile";
+import { Review, WorkerProfile as WorkerProfileType, CompanyProfile as CompanyProfileType } from "@/lib/schemas/profile.schema";
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useRouter } from "next/navigation";
 
@@ -65,6 +66,24 @@ export default function ProfilePage() {
     city: user.city,
     skills: [],
   };
+
+  if (user.type === "company") {
+    const companyProfile: CompanyProfileType = {
+      userId: user.id,
+      companyName: user.name,
+      cnpj: user.cnpj || "",
+      email: user.email,
+      phone: "", // Add phone to user model if needed
+      website: "", // Add website to user model if needed
+      description: user.bio,
+    };
+
+    return (
+      <div className="container py-10">
+        <CompanyProfile profile={companyProfile} onLogout={logoutToSelection} />
+      </div>
+    );
+  }
 
   return (
     <div className="container py-10">

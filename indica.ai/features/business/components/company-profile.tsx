@@ -11,14 +11,16 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Mail, Phone, Globe, Building2, Search } from "lucide-react";
+import { Mail, Phone, Globe, Building2, Search, LogOut } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import Link from "next/link";
 
 interface CompanyProfileProps {
   profile: CompanyProfileType;
+  onLogout?: () => void;
 }
 
-export function CompanyProfile({ profile }: CompanyProfileProps) {
+export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header Section */}
@@ -41,6 +43,16 @@ export function CompanyProfile({ profile }: CompanyProfileProps) {
               <Building2 className="w-4 h-4" />
               Company • {profile.cnpj}
             </p>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors mt-2"
+                title="Sair para seleção"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
@@ -80,40 +92,48 @@ export function CompanyProfile({ profile }: CompanyProfileProps) {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
-        {/* Main Info */}
-        <div className="md:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>About Company</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                {profile.description || "No description provided."}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar Actions */}
-        <div className="space-y-6">
-          <Card className="bg-primary/5 border-primary/10">
-            <CardHeader>
-              <CardTitle className="text-lg">Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Looking for a new employee? Check their reputation before
-                hiring.
-              </p>
-              <Link href="/search" className="block">
-                <Button className="w-full" variant="outline">
-                  Check Reputation
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="mt-8">
+        <Tabs defaultValue="evaluations" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="evaluations">Avaliações Feitas</TabsTrigger>
+            <TabsTrigger value="search">Pesquisar Profissionais</TabsTrigger>
+          </TabsList>
+          <TabsContent value="evaluations" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Avaliações Realizadas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-center py-8">
+                  Nenhuma avaliação realizada ainda.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="search" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pesquisar Profissionais</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="search"
+                      placeholder="Buscar por nome, cargo ou habilidades..."
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
+                    />
+                  </div>
+                  <Button>Buscar</Button>
+                </div>
+                <div className="mt-8 text-center text-muted-foreground">
+                  <p>Utilize a barra de pesquisa para encontrar profissionais.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

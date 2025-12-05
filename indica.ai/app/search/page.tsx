@@ -25,7 +25,7 @@ export default async function SearchPage({
   }
 
   return (
-    <div className="container max-w-5xl py-10 space-y-8">
+    <div className="container max-w-5xl py-10 space-y-8 mx-auto">
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">
           Search Worker Reputation
