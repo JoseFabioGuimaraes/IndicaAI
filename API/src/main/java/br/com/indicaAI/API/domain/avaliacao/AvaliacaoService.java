@@ -20,7 +20,8 @@ public class AvaliacaoService {
     private final FuncionarioRepository funcionarioRepository;
     private final EmpresaRepository empresaRepository;
 
-    public AvaliacaoService(AvaliacaoRepository avaliacaoRepository, FuncionarioRepository funcionarioRepository, EmpresaRepository empresaRepository) {
+    public AvaliacaoService(AvaliacaoRepository avaliacaoRepository, FuncionarioRepository funcionarioRepository,
+            EmpresaRepository empresaRepository) {
         this.avaliacaoRepository = avaliacaoRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.empresaRepository = empresaRepository;
@@ -44,8 +45,7 @@ public class AvaliacaoService {
         MetricasAvaliacao metricas = new MetricasAvaliacao(
                 dados.notaAssiduidade(),
                 dados.notaTecnica(),
-                dados.notaComportamental()
-        );
+                dados.notaComportamental());
         avaliacao.setMetricas(metricas);
 
         avaliacaoRepository.save(avaliacao);
@@ -53,7 +53,8 @@ public class AvaliacaoService {
     }
 
     @Transactional
-    public DetalhamentoAvaliacaoDTO responder(UUID idAvaliacao, ResponderAvaliacaoDTO dados, Funcionario funcionarioAutenticado) {
+    public DetalhamentoAvaliacaoDTO responder(UUID idAvaliacao, ResponderAvaliacaoDTO dados,
+            Funcionario funcionarioAutenticado) {
         var avaliacao = avaliacaoRepository.findById(idAvaliacao)
                 .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada"));
 
@@ -72,6 +73,11 @@ public class AvaliacaoService {
     // Renomeado para ser genérico (usado por Empresa e Funcionário)
     public List<DetalhamentoAvaliacaoDTO> listarPorFuncionario(UUID funcionarioId) {
         var lista = avaliacaoRepository.findAllByFuncionarioId(funcionarioId);
+        return lista.stream().map(DetalhamentoAvaliacaoDTO::new).toList();
+    }
+
+    public List<DetalhamentoAvaliacaoDTO> listarPorEmpresa(UUID empresaId) {
+        var lista = avaliacaoRepository.findAllByEmpresaId(empresaId);
         return lista.stream().map(DetalhamentoAvaliacaoDTO::new).toList();
     }
 }

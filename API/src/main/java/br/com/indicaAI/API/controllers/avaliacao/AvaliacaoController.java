@@ -30,8 +30,7 @@ public class AvaliacaoController {
     public ResponseEntity<DetalhamentoAvaliacaoDTO> avaliar(
             @RequestBody @Valid CriarAvaliacaoDTO dto,
             @AuthenticationPrincipal Empresa empresaLogada,
-            UriComponentsBuilder uriBuilder
-    ) {
+            UriComponentsBuilder uriBuilder) {
         var avaliacao = avaliacaoService.avaliar(dto, empresaLogada);
         URI uri = uriBuilder.path("/avaliacoes/{id}").buildAndExpand(avaliacao.id()).toUri();
         return ResponseEntity.created(uri).body(avaliacao);
@@ -41,8 +40,7 @@ public class AvaliacaoController {
     public ResponseEntity<DetalhamentoAvaliacaoDTO> responder(
             @PathVariable UUID id,
             @RequestBody @Valid ResponderAvaliacaoDTO dto,
-            @AuthenticationPrincipal Funcionario funcionarioLogado
-    ) {
+            @AuthenticationPrincipal Funcionario funcionarioLogado) {
         var resposta = avaliacaoService.responder(id, dto, funcionarioLogado);
         return ResponseEntity.ok(resposta);
     }
@@ -50,8 +48,7 @@ public class AvaliacaoController {
     // FUNCIONÁRIO VÊ SUAS PRÓPRIAS AVALIAÇÕES
     @GetMapping("/minhas")
     public ResponseEntity<List<DetalhamentoAvaliacaoDTO>> listarMinhas(
-            @AuthenticationPrincipal Funcionario funcionarioLogado
-    ) {
+            @AuthenticationPrincipal Funcionario funcionarioLogado) {
         var lista = avaliacaoService.listarPorFuncionario(funcionarioLogado.getId());
         return ResponseEntity.ok(lista);
     }
@@ -59,10 +56,17 @@ public class AvaliacaoController {
     // NOVO: EMPRESA VÊ HISTÓRICO DE UM FUNCIONÁRIO (DE TODAS AS EMPRESAS)
     @GetMapping("/funcionario/{id}")
     public ResponseEntity<List<DetalhamentoAvaliacaoDTO>> listarHistoricoDeFuncionario(
-            @PathVariable UUID id
-    ) {
+            @PathVariable UUID id) {
         // Retorna a lista completa, onde cada item tem o nome da empresa que avaliou
         var lista = avaliacaoService.listarPorFuncionario(id);
+        return ResponseEntity.ok(lista);
+    }
+
+    // EMPRESA VÊ AVALIAÇÕES QUE ELA FEZ
+    @GetMapping("/minhas-avaliacoes")
+    public ResponseEntity<List<DetalhamentoAvaliacaoDTO>> listarMinhasAvaliacoes(
+            @AuthenticationPrincipal Empresa empresaLogada) {
+        var lista = avaliacaoService.listarPorEmpresa(empresaLogada.getId());
         return ResponseEntity.ok(lista);
     }
 }

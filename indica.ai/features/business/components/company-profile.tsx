@@ -11,9 +11,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Mail, Phone, Globe, Building2, Search, LogOut } from "lucide-react";
+import { Mail, Phone, Globe, Building2, Search, LogOut, Star } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { CompanyService, Evaluation } from "../services/company.service";
 
 interface CompanyProfileProps {
   profile: CompanyProfileType;
@@ -21,6 +23,28 @@ interface CompanyProfileProps {
 }
 
 export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvaluations = async () => {
+      const token = localStorage.getItem("auth:token");
+      if (token) {
+        try {
+          const data = await CompanyService.getEvaluations(token);
+          setEvaluations(data);
+        } catch (error) {
+          console.error("Failed to fetch evaluations", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchEvaluations();
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header Section */}
@@ -104,9 +128,49 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
                 <CardTitle>Avaliações Realizadas</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  Nenhuma avaliação realizada ainda.
-                </p>
+                {loading ? (
+                  <p className="text-center py-8 text-muted-foreground">Carregando...</p>
+                ) : evaluations.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Nenhuma avaliação realizada ainda.
+                  </p>
+                ) : (
+                  <div className="space-y-6">
+                    {evaluations.map((evaluation) => (
+                      <div key={evaluation.id} className="border-b pb-6 last:border-0 last:pb-0">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">{evaluation.nomeFuncionario}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Avaliado em {new Date(evaluation.dataAvaliacao).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md">
+                            <Star className="w-4 h-4 fill-current" />
+                            <span className="font-bold">
+                              {((evaluation.metricas.assiduidade + evaluation.metricas.tecnica + evaluation.metricas.comportamental) / 3).toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="bg-muted/30 p-4 rounded-md mb-4">
+                          <p className="text-sm italic">"{evaluation.descricao}"</p>
+                        </div>
+
+                        {evaluation.resposta && (
+                          <div className="ml-8 mt-4 bg-blue-50 dark:bg-blue-950/30 p-4 rounded-md border-l-4 border-blue-500">
+                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                              Resposta de {evaluation.nomeFuncionario}:
+                            </p>
+                            <p className="text-sm text-foreground">
+                              {evaluation.resposta}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

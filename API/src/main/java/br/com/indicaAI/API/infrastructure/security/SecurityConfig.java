@@ -42,6 +42,7 @@ public class SecurityConfig {
                     req.requestMatchers(HttpMethod.POST, "/avaliacoes/*/responder").hasRole("FUNCIONARIO");
                     req.requestMatchers(HttpMethod.GET, "/avaliacoes/minhas").hasRole("FUNCIONARIO");
                     req.requestMatchers(HttpMethod.GET, "/avaliacoes/funcionario/**").hasRole("EMPRESA");
+                    req.requestMatchers(HttpMethod.GET, "/avaliacoes/minhas-avaliacoes").hasRole("EMPRESA");
                     req.requestMatchers(HttpMethod.GET, "/empresas/me").hasRole("EMPRESA");
                     req.anyRequest().authenticated();
                 })
