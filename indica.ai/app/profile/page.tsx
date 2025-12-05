@@ -9,11 +9,29 @@ import { Review, WorkerProfile as WorkerProfileType, CompanyProfile as CompanyPr
 import { Spinner } from "@/shared/components/ui/spinner";
 import { useRouter } from "next/navigation";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/button";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+
 export default function ProfilePage() {
   const { user, loading, logoutToSelection } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [fetchingReviews, setFetchingReviews] = useState(true);
   const router = useRouter();
+
+  // Reply State
+  const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [submittingReply, setSubmittingReply] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -21,19 +39,44 @@ export default function ProfilePage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    async function fetchReviews() {
-      if (user?.type === "worker") {
-        const data = await EvaluationService.getMyEvaluations();
-        setReviews(data);
-      }
-      setFetchingReviews(false);
+  async function fetchReviews() {
+    if (user?.type === "worker") {
+      const data = await EvaluationService.getMyEvaluations();
+      setReviews(data);
     }
+    setFetchingReviews(false);
+  }
 
+  useEffect(() => {
     if (user) {
       fetchReviews();
     }
   }, [user]);
+
+  const handleOpenReplyDialog = (reviewId: string) => {
+    setSelectedReviewId(reviewId);
+    setReplyText("");
+    setIsReplyDialogOpen(true);
+  };
+
+  const handleSubmitReply = async () => {
+    if (!selectedReviewId || !replyText.trim()) return;
+
+    setSubmittingReply(true);
+    const token = localStorage.getItem("auth:token");
+    if (token) {
+      try {
+        await EvaluationService.replyToEvaluation(token, selectedReviewId, replyText);
+        setIsReplyDialogOpen(false);
+        fetchReviews(); // Refresh to show the reply
+      } catch (error) {
+        console.error("Failed to submit reply", error);
+        // Ideally show a toast error here
+      } finally {
+        setSubmittingReply(false);
+      }
+    }
+  };
 
   if (loading || fetchingReviews) {
     return (
@@ -87,7 +130,35 @@ export default function ProfilePage() {
 
   return (
     <div className="container py-10">
-      <WorkerProfile profile={profile} onLogout={logoutToSelection} />
+      <WorkerProfile profile={profile} onLogout={logoutToSelection} onReply={handleOpenReplyDialog} />
+
+      <Dialog open={isReplyDialogOpen} onOpenChange={setIsReplyDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Responder Avaliação</DialogTitle>
+            <DialogDescription>
+              Sua resposta ficará visível publicamente no seu perfil.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="reply">Sua Resposta</Label>
+              <Textarea
+                id="reply"
+                placeholder="Escreva sua resposta aqui..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReplyDialogOpen(false)} disabled={submittingReply}>Cancelar</Button>
+            <Button onClick={handleSubmitReply} disabled={submittingReply || !replyText.trim()}>
+              {submittingReply ? "Enviando..." : "Enviar Resposta"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

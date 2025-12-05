@@ -18,9 +18,10 @@ import { Mail, Phone, MapPin, Briefcase, LogOut } from "lucide-react";
 interface WorkerProfileProps {
   profile: WorkerProfileType;
   onLogout?: () => void;
+  onReply?: (reviewId: string) => void;
 }
 
-export function WorkerProfile({ profile, onLogout }: WorkerProfileProps) {
+export function WorkerProfile({ profile, onLogout, onReply }: WorkerProfileProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header Section */}
@@ -131,7 +132,7 @@ export function WorkerProfile({ profile, onLogout }: WorkerProfileProps) {
             </h2>
           </div>
 
-          <ReviewList reviews={profile.reviews || []} userName={profile.fullName} />
+          <ReviewList reviews={profile.reviews || []} userName={profile.fullName} onReply={onReply} />
         </div>
       </div>
     </div>

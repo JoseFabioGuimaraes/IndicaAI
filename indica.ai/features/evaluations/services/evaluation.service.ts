@@ -5,17 +5,11 @@ const api = axios.create({
     baseURL: "http://localhost:8080",
 });
 
-interface MetricasAvaliacao {
-    notaAssiduidade: number;
-    notaTecnica: number;
-    notaComportamental: number;
-}
-
 interface DetalhamentoAvaliacaoDTO {
     id: string;
     nomeEmpresa: string;
     nomeFuncionario: string;
-    metricas: MetricasAvaliacao;
+    nota: number;
     descricao: string;
     resposta: string;
     dataAvaliacao: string;
@@ -34,19 +28,12 @@ export class EvaluationService {
             });
 
             return response.data.map((dto) => {
-                // Calculate average rating
-                const average =
-                    (dto.metricas.notaAssiduidade +
-                        dto.metricas.notaTecnica +
-                        dto.metricas.notaComportamental) /
-                    3;
-
                 return {
                     id: dto.id,
                     authorId: "company-placeholder", // We don't have company ID in DTO, using placeholder
                     authorName: dto.nomeEmpresa,
                     targetId: "user-placeholder", // We don't have user ID in DTO, using placeholder
-                    rating: Math.round(average * 10) / 10, // Round to 1 decimal
+                    rating: dto.nota ? dto.nota : 0, // Use nota directly
                     comment: dto.descricao,
                     reply: dto.resposta,
                     createdAt: new Date(dto.dataAvaliacao),
@@ -56,5 +43,13 @@ export class EvaluationService {
             console.error("Failed to fetch evaluations", error);
             return [];
         }
+    }
+
+    static async replyToEvaluation(token: string, evaluationId: string, reply: string): Promise<void> {
+        await api.post(`/avaliacoes/${evaluationId}/responder`, { resposta: reply }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
     }
 }

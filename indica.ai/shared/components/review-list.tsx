@@ -6,14 +6,17 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
+import { Button } from "@/shared/components/ui/button";
+import { MessageSquareReply } from "lucide-react";
 import { format } from "date-fns";
 
 interface ReviewListProps {
   reviews: Review[];
   userName: string;
+  onReply?: (reviewId: string) => void;
 }
 
-export function ReviewList({ reviews, userName }: ReviewListProps) {
+export function ReviewList({ reviews, userName, onReply }: ReviewListProps) {
   if (!reviews || reviews.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -49,13 +52,22 @@ export function ReviewList({ reviews, userName }: ReviewListProps) {
             <p className="text-sm text-foreground/80 leading-relaxed">
               {review.comment}
             </p>
-            {review.reply && (
+            {review.reply ? (
               <div className="mt-4 bg-muted p-3 rounded-md text-sm">
                 <p className="font-semibold text-xs text-muted-foreground mb-1">
                   Resposta de {userName}:
                 </p>
                 <p className="text-foreground/90">{review.reply}</p>
               </div>
+            ) : (
+              onReply && (
+                <div className="mt-4 flex justify-end">
+                  <Button variant="outline" size="sm" onClick={() => onReply(review.id)}>
+                    <MessageSquareReply className="w-4 h-4 mr-2" />
+                    Responder
+                  </Button>
+                </div>
+              )
             )}
           </CardContent>
         </Card>
