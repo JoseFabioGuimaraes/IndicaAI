@@ -43,28 +43,56 @@ export class AuthService {
 
       const token = loginResponse.data.token;
 
-      // 2. Get User Details
-      const userResponse = await api.get<FuncionarioResponse>("/funcionarios/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // 2. Try to get User Details (Worker first, then Company)
+      try {
+        const userResponse = await api.get<FuncionarioResponse>("/funcionarios/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const funcionario = userResponse.data;
+        const funcionario = userResponse.data;
 
-      // 3. Map to User model
-      const user: User = {
-        id: funcionario.id,
-        name: funcionario.nomeCompleto,
-        email: funcionario.email,
-        type: "worker", // Assuming worker for now as per task
-        cpf: funcionario.cpf,
-        city: funcionario.cidade,
-        bio: funcionario.sobre,
-        status: funcionario.status,
-      };
+        const user: User = {
+          id: funcionario.id,
+          name: funcionario.nomeCompleto,
+          email: funcionario.email,
+          type: "worker",
+          cpf: funcionario.cpf,
+          city: funcionario.cidade,
+          bio: funcionario.sobre,
+          status: funcionario.status,
+        };
 
-      return { user, token };
+        return { user, token };
+      } catch (workerError) {
+        // If worker fetch fails, try company
+        try {
+          const companyResponse = await api.get<EmpresaResponse>("/empresas/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const empresa = companyResponse.data;
+
+          const user: User = {
+            id: empresa.id,
+            name: empresa.razaoSocial,
+            email: empresa.email,
+            type: "company",
+            cnpj: empresa.cnpj,
+            city: empresa.cidade,
+            bio: empresa.sobre,
+            status: empresa.status,
+          };
+
+          return { user, token };
+        } catch (companyError) {
+          console.error("Failed to fetch user details for both worker and company", companyError);
+          throw new Error("Failed to retrieve user profile");
+        }
+      }
     } catch (error) {
       console.error("Login API error:", error);
       throw error;

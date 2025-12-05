@@ -30,18 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      // If no user and not on a public auth page, redirect to selection
-      // This logic might need refinement to avoid infinite loops or blocking public pages
-      // For now, we'll rely on the protected routes logic or specific page checks
-      // But the requirement says: "If no user... redirect to page to select..."
-      const publicRoutes = ["/selection", "/login", "/register"];
-      // Check if current path starts with any public route (simple check)
+      const publicRoutes = ["/", "/login", "/register"];
       const isPublic = publicRoutes.some((route) =>
         pathname?.startsWith(route)
       );
 
       if (!isPublic && pathname !== "/") {
-        router.push("/selection");
+        router.push("/");
       }
     }
     setLoading(false);
@@ -62,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (user.status === "PENDENTE_VALIDACAO") {
         router.push("/pending-approval");
       } else {
-        router.push("/profile"); // Redirect to profile
+        router.push("/profile");
       }
     } catch (error) {
       console.error("Login failed", error);
@@ -98,9 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("auth:token");
 
     if (userType === "worker") {
-      router.push("/login?type=worker");
+      router.push("/");
     } else {
-      router.push("/selection");
+      router.push("/");
     }
   }
 
@@ -108,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem("auth:user");
     localStorage.removeItem("auth:token");
-    router.push("/selection");
+    router.push("/");
   }
 
   return (

@@ -6,7 +6,9 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/shared/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/shared/components/ui/button";
 
 export default async function SearchPage({
   searchParams,
@@ -26,6 +28,15 @@ export default async function SearchPage({
 
   return (
     <div className="container max-w-5xl py-10 space-y-8 mx-auto">
+      <div>
+        <Link href="/profile">
+          <Button variant="ghost" className="gap-2 pl-0 hover:bg-transparent hover:text-primary">
+            <ArrowLeft className="w-4 h-4" />
+            Voltar para o Perfil
+          </Button>
+        </Link>
+      </div>
+
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold tracking-tight">
           Search Worker Reputation
