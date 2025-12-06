@@ -25,10 +25,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const loadUser = useCallback(() => {
+  const loadUser = useCallback(async () => {
+    const token = localStorage.getItem("auth:token");
     const storedUser = localStorage.getItem("auth:user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+
+    if (token) {
+      try {
+        // Always try to fetch fresh data
+        const user = await AuthService.getProfile(token);
+        setUser(user);
+        localStorage.setItem("auth:user", JSON.stringify(user));
+      } catch (error) {
+        console.error("Failed to fetch user profile", error);
+        // Fallback to stored user if fetch fails (e.g. offline), or logout if token invalid
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          // If no stored user and fetch failed, maybe token is invalid
+          localStorage.removeItem("auth:token");
+        }
+      }
     } else {
       const publicRoutes = ["/", "/login", "/register"];
       const isPublic = publicRoutes.some((route) =>

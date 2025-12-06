@@ -13,15 +13,18 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Mail, Phone, MapPin, Briefcase, LogOut } from "lucide-react";
+import { Mail, Phone, MapPin, Briefcase, LogOut, Edit } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
 
 interface WorkerProfileProps {
   profile: WorkerProfileType;
   onLogout?: () => void;
   onReply?: (reviewId: string) => void;
+  isEditable?: boolean;
+  onEditBio?: () => void;
 }
 
-export function WorkerProfile({ profile, onLogout, onReply }: WorkerProfileProps) {
+export function WorkerProfile({ profile, onLogout, onReply, isEditable, onEditBio }: WorkerProfileProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header Section */}
@@ -93,8 +96,14 @@ export function WorkerProfile({ profile, onLogout, onReply }: WorkerProfileProps
         {/* Left Column: Info & Skills */}
         <div className="space-y-6 md:col-span-1">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg">About</CardTitle>
+              {isEditable && onEditBio && (
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onEditBio}>
+                  <Edit className="h-4 w-4" />
+                  <span className="sr-only">Edit Bio</span>
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -116,7 +125,7 @@ export function WorkerProfile({ profile, onLogout, onReply }: WorkerProfileProps
                 ))}
                 {!profile.skills?.length && (
                   <span className="text-sm text-muted-foreground">
-                    No skills listed
+                    IN DEVELOPMENT
                   </span>
                 )}
               </div>

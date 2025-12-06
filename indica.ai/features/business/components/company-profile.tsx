@@ -51,9 +51,21 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
   }, []);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
+    const delayDebounceFn = setTimeout(async () => {
       if (searchTerm.trim()) {
-        handleSearch();
+        setSearching(true);
+        setHasSearched(true);
+        const token = localStorage.getItem("auth:token");
+        if (token) {
+          try {
+            const results = await CompanyService.searchWorkers(token, searchTerm);
+            setSearchResults(results);
+          } catch (error) {
+            console.error("Failed to search workers", error);
+          } finally {
+            setSearching(false);
+          }
+        }
       } else {
         setSearchResults([]);
         setHasSearched(false);
@@ -62,24 +74,6 @@ export function CompanyProfile({ profile, onLogout }: CompanyProfileProps) {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
-
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-
-    setSearching(true);
-    setHasSearched(true);
-    const token = localStorage.getItem("auth:token");
-    if (token) {
-      try {
-        const results = await CompanyService.searchWorkers(token, searchTerm);
-        setSearchResults(results);
-      } catch (error) {
-        console.error("Failed to search workers", error);
-      } finally {
-        setSearching(false);
-      }
-    }
-  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
