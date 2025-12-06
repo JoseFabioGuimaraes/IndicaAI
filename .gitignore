@@ -1,0 +1,9 @@
+.env
+.idea/
+target/
+*.class
+*.jar
+node_modules/
+.next/
+__pycache__/
+*.pyc
