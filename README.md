@@ -108,4 +108,4 @@ aval.ai/
 
 ## 🌟 Credits
 
-Developed by **[@jfabioguimaraes](https://github.com/jfabioguimaraes)**.
+Developed by **[@jfabioguimaraes](https://github.com/josefabioguimaraes)**.
