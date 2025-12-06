@@ -1,0 +1,120 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: avalai-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: minha_app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - avalai-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: avalai-rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - avalai-network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot API
+  api:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    container_name: avalai-api
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/minha_app_db
+      DB_USER: postgres
+      DB_PASSWORD: 123456
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      MAIL_HOST: smtp.mailtrap.io
+      MAIL_PORT: 587
+      MAIL_USER: your_mailtrap_user
+      MAIL_PASS: your_mailtrap_password
+      JWT_SECRET: your_jwt_secret_key_here_make_it_long_and_secure
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    networks:
+      - avalai-network
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Microservice: Locke AI (Triagem)
+  locke-ai:
+    build: ./Microservice/lockeAI
+    container_name: avalai-worker-triagem
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - avalai-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  # Microservice: Reconhecimento AI (Biometria)
+  reconhecimento-ai:
+    build: ./Microservice/reconhecimento-AI
+    container_name: avalai-worker-biometria
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+      - avalai-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  # Frontend: Indica AI (Next.js)
+  frontend:
+    build:
+      context: ./indica.ai
+      dockerfile: Dockerfile
+    container_name: avalai-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    networks:
+      - avalai-network
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+
+networks:
+  avalai-network:
+    driver: bridge

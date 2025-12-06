@@ -1,7 +1,6 @@
 package br.com.indicaAI.API.domain.avaliacao.dtos;
 
 import br.com.indicaAI.API.domain.avaliacao.Avaliacao;
-import br.com.indicaAI.API.domain.avaliacao.MetricasAvaliacao;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
